@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaError } from 'src/prisma/error.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -18,14 +17,8 @@ export class UserService {
       });
 
       return createdUser;
-    } catch (e) {
-      if (e.code === PrismaError.UniqueConstraintFailed) {
-        throw new ConflictException({
-          // TODO: e.meta.target is array
-          [e.meta.target]: 'Unique constraint violation',
-        });
-      }
-      throw new ConflictException();
+    } catch (error) {
+      throw new ConflictException(error);
     }
   }
 
