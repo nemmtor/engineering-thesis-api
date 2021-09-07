@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { getPrismaError } from '../errors/error.types';
+import { getPrismaError } from '../errors/error.helpers';
 
 @Catch(ConflictException)
 export class ConflictExceptionFilter implements ExceptionFilter {

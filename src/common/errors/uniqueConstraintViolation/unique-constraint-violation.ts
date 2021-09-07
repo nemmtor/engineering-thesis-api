@@ -1,4 +1,4 @@
-import { PrismaErrorCode } from '../error.types';
+import { PrismaErrorCode } from '../error.enum';
 
 export type UniqueConstraintViolationError = {
   code: PrismaErrorCode.UniqueConstraintViolation;

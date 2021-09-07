@@ -1,13 +1,14 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.json',
+    project: './tsconfig.json',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: ['prettier', 'unicorn'],
   extends: [
-    'plugin:@typescript-eslint/recommended',
+    'airbnb-base',
     'plugin:prettier/recommended',
+    'airbnb-typescript/base'
   ],
   root: true,
   env: {
@@ -16,9 +17,22 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
-    '@typescript-eslint/interface-name-prefix': 'off',
+    "unicorn/filename-case": [
+      "error",
+      {
+        "case": "kebabCase"
+      }
+    ],
+    'arrow-body-style': 'off',
+    'import/prefer-default-export': 'off',
+    "class-methods-use-this": 'off',
+    "import/no-extraneous-dependencies": 'off',
+    '@typescript-eslint/no-useless-constructor': 'off',
+    '@typescript-eslint/lines-between-class-members': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "curly": "error",
   },
 };
