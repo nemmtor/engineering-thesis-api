@@ -1,2 +1,5 @@
 dist
 db
+**/*.d.ts
+*.json
+**/migrations/*
