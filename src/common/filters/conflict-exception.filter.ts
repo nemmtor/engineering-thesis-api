@@ -1,8 +1,9 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
   ConflictException,
+  ExceptionFilter,
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { getPrismaError } from '../errors/error.helpers';
@@ -12,10 +13,12 @@ export class ConflictExceptionFilter implements ExceptionFilter {
   catch(exception: ConflictException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const status = exception.getStatus();
 
     const prismaError = getPrismaError(exception.getResponse());
 
-    response.status(status).json(prismaError);
+    response.status(HttpStatus.CONFLICT).json({
+      message: prismaError,
+      statusCode: HttpStatus.CONFLICT,
+    });
   }
 }
