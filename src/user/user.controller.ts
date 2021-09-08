@@ -1,4 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { UserByIdPipe } from 'src/common/pipes/user-by-id.pipe';
+import { User } from '.prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 
@@ -17,8 +19,8 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  findOne(@Param('id', UserByIdPipe) user: User) {
+    return user;
   }
 
   // @Patch(':id')
