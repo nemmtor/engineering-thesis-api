@@ -16,8 +16,5 @@ export const isUniqeConstraintViolationError = (
 export const parseUniqueConstraintViolationError = (
   error: UniqueConstraintViolationError,
 ) => {
-  return error.meta.target.reduce(
-    (acc, curr) => ({ ...acc, [curr]: 'This field has to be unique' }),
-    {},
-  );
+  return error.meta.target.map((field) => `${field} has to be unique`);
 };
