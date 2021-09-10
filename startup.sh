@@ -1,2 +1,2 @@
-npm run prisma:migration-run
+npx prisma migrate deploy
 npm run start:dev

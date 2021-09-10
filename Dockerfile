@@ -1,32 +1,25 @@
-FROM node:14-slim As development
+FROM node:14 AS builder
 
-RUN apt-get update
-RUN apt-get install -y openssl
+# Create app directory
+WORKDIR /app
 
-WORKDIR /usr/src/app
-
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
+COPY prisma ./prisma/
 
-RUN npm install --only=development
+# Install app dependencies
+RUN npm install
 
 COPY . .
 
-RUN npm run prisma:prebuild
 RUN npm run build
 
-FROM node:14-slim as production
+FROM node:14 AS production
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
 
-WORKDIR /usr/src/app
 
-COPY package*.json ./
-
-RUN npm install --only=production
-
-COPY . .
-
-COPY --from=development /usr/src/app/dist ./dist
-
-CMD ["node", "dist/main"]
+EXPOSE 3000
+CMD [ "npm", "run", "start:prod" ]
