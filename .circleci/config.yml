@@ -20,12 +20,20 @@ jobs:
           name: Run tests
           command: npm run test
 
-  pull-and-build:
+  deploy:
     docker:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose down && git pull && docker-compose up --build -d -V"
+      - run: 
+          name: Shut down containers
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose down"
+      - run: 
+          name: Checkout on server
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git pull"
+      - run: 
+          name: Build and start containers
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose up --build -d -V"
 
 # Orchestrate our job run sequence
 workflows:
@@ -33,7 +41,7 @@ workflows:
   build-project:
     jobs:
       - tests
-      - pull-and-build:
+      - deploy:
           requires:
             - "tests"
           filters:
