@@ -1,7 +1,13 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     DATABASE_URL: string;
-    POSTGRES_PASSWORD: string;
+    SERVER_PORT: string;
+    SERVER_SECRET: string;
     POSTGRES_DB: string;
+    POSTGRES_USER: string;
+    POSTGRES_PASSWORD: string;
+    PGADMIN_DEFAULT_EMAIL: string;
+    PGADMIN_DEFAULT_PASSWORD: string;
+    PGADMIN_LISTEN_PORT: string;
   }
 }
