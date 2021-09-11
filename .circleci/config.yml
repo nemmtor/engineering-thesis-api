@@ -31,12 +31,6 @@ jobs:
           name: Fetch changes on server
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git fetch --all && git checkout ${CIRCLE_BRANCH} && git reset --hard origin/${CIRCLE_BRANCH}"
       - run: 
-          name: Git ignore changes in file permissions
-          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git config core.fileMode false"
-      - run: 
-          name: Add permissions to start script
-          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && chmod u+x start.prod.sh"
-      - run: 
           name: Build and start containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose up --build -d -V"
 

@@ -7,7 +7,6 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   const config = new DocumentBuilder()
     .setTitle('SalesHelper API')
     .setDescription('This is the API documentation for SalesHelper project.')

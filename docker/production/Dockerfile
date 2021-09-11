@@ -1,0 +1,25 @@
+FROM node:14 AS builder
+
+WORKDIR /api
+
+COPY package*.json ./
+
+COPY prisma ./prisma/
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM node:14 AS production
+
+COPY --from=builder /api/node_modules ./node_modules
+COPY --from=builder /api/package*.json ./
+COPY --from=builder /api/scripts/start.prod.sh ./
+COPY --from=builder /api/dist ./dist
+COPY --from=builder /api/prisma ./
+
+
+EXPOSE 3000
+CMD [ "npm", "run", "start:prod" ]
