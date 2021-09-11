@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-export type SeedLoaderCallback = (prisma: PrismaClient) => Promise<any>;
+export type SeedLoaderCallback = (prisma: PrismaClient) => Promise<void>;
 
 export class SeedLoader {
   constructor(private prisma: PrismaClient) {}
