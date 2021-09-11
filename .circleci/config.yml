@@ -28,21 +28,41 @@ jobs:
           name: Shut down containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose down"
       - run: 
-          name: Checkout on server
-          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git pull"
+          name: Fetch changes on server
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git fetch --all && git checkout ${CIRCLE_BRANCH} && git reset --hard origin/${CIRCLE_BRANCH}"
+      - run: 
+          name: Git ignore changes in file permissions
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git config core.fileMode false"
+      - run: 
+          name: Add permissions to start script
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && chmod u+x start.prod.sh"
       - run: 
           name: Build and start containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose up --build -d -V"
 
 workflows:
   version: 2
-  test-and-deploy:
+  test-and-possible-manual-deploy:
     jobs:
-      - tests
+      - tests:
+          filters:
+            branches:
+              ignore:
+                - main
+      - approve-branch-deploy:
+          requires:
+            - tests
+          type: approval
       - deploy:
           requires:
-            - "tests"
+            - approve-branch-deploy
+  test-and-deploy:
+    jobs:
+      - tests:
           filters:
             branches:
               only:
                 - main
+      - deploy:
+          requires:
+            - tests

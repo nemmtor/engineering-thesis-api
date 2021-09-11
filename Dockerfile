@@ -18,9 +18,10 @@ FROM node:14 AS production
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/start.prod.sh ./
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./
 
 
 EXPOSE 3000
-RUN npx prisma migrate deploy
 CMD [ "npm", "run", "start:prod" ]
