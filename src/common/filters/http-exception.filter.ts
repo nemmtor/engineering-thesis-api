@@ -28,6 +28,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       response.status(status).json({
         errors: parsePrismaError(exceptionResponse),
       });
+      return;
     }
 
     if (objectHasMessageField(exceptionResponse)) {
