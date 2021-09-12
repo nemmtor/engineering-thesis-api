@@ -6,7 +6,6 @@ export class UserByIdPipe implements PipeTransform<string> {
   constructor(private readonly userService: UserService) {}
 
   async transform(userId: string) {
-    throw new Error();
     return this.userService.findOne(userId);
   }
 }
