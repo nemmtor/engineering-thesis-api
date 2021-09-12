@@ -18,6 +18,7 @@ COPY --from=builder /api/node_modules ./node_modules
 COPY --from=builder /api/package*.json ./
 COPY --from=builder /api/scripts/start.prod.sh ./
 COPY --from=builder /api/dist ./dist
+COPY --from=builder /api/src ./src
 COPY --from=builder /api/prisma ./
 
 
