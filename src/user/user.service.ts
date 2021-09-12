@@ -4,17 +4,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '.prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     try {
-      const createdUser = await this.prismaService.user.create({
-        data: createUserDto,
-      });
+      const { password, ...createdUser } = await this.prismaService.user.create(
+        {
+          data: createUserDto,
+        },
+      );
 
       return createdUser;
     } catch (error) {
@@ -38,11 +41,29 @@ export class UserService {
     return user;
   }
 
+  async findOneByemail(email: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   // update(id: number, updateUserDto: UpdateUserDto) {
   //   return `This action updates a #${id} user`;
   // }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} user`;
-  // }
+  async remove(id: string) {
+    try {
+      await this.prismaService.user.delete({
+        where: { id },
+      });
+    } catch (e) {
+      throw new NotFoundException();
+    }
+  }
 }

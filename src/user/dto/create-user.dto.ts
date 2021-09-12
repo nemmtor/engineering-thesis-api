@@ -1,4 +1,10 @@
-import { IsString, IsEnum, IsEmail, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsEmail,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { User, UserRole } from '.prisma/client';
 
@@ -18,6 +24,7 @@ export class CreateUserDto implements Partial<User> {
   password: string;
 
   @ApiProperty({ enum: UserRole })
+  @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
 }

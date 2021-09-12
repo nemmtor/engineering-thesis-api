@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { UserByIdPipe } from 'src/common/pipes/user-by-id.pipe';
+import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
+import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorDto } from 'src/common/errors/error.dto';
-import { User } from '.prisma/client';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { ActiveGuard } from 'src/auth/guards/active.guard';
+import { User, UserRole } from '.prisma/client';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 
@@ -12,26 +15,26 @@ import { UserDto } from './dto/user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Creates user' })
-  @ApiResponse({
-    description: 'User created',
-    type: UserDto,
-    status: 201,
-  })
-  @ApiResponse({
-    description: 'Bad request',
-    status: 400,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Email is already taken',
-    status: 409,
-    type: ErrorDto,
-  })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+  // @Post()
+  // @ApiOperation({ summary: 'Creates user' })
+  // @ApiResponse({
+  //   description: 'User created',
+  //   type: UserDto,
+  //   status: 201,
+  // })
+  // @ApiResponse({
+  //   description: 'Bad request',
+  //   status: 400,
+  //   type: ErrorDto,
+  // })
+  // @ApiResponse({
+  //   description: 'Email is already taken',
+  //   status: 409,
+  //   type: ErrorDto,
+  // })
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.userService.create(createUserDto);
+  // }
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
@@ -60,8 +63,10 @@ export class UserController {
   //   return this.userService.update(+id, updateUserDto);
   // }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
+  @UseGuards(JwtAuthGuard, ActiveGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    await this.userService.remove(id);
+  }
 }
