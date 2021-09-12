@@ -57,7 +57,13 @@ export class UserService {
   //   return `This action updates a #${id} user`;
   // }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} user`;
-  // }
+  async remove(id: string) {
+    try {
+      await this.prismaService.user.delete({
+        where: { id },
+      });
+    } catch (e) {
+      throw new NotFoundException();
+    }
+  }
 }

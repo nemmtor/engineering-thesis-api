@@ -18,29 +18,26 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const exceptionResponse = exception.getResponse();
 
     if (typeof exceptionResponse === 'string') {
-      response.status(status).json({
+      return response.status(status).json({
         errors: [exceptionResponse],
       });
-      return;
     }
 
     if (isPrismaError(exceptionResponse)) {
-      response.status(status).json({
+      return response.status(status).json({
         errors: parsePrismaError(exceptionResponse),
       });
-      return;
     }
 
     if (objectHasMessageField(exceptionResponse)) {
-      response.status(status).json({
+      return response.status(status).json({
         errors: Array.isArray(exceptionResponse.message)
           ? exceptionResponse.message
           : [exceptionResponse.message],
       });
-      return;
     }
 
-    response.status(status).json({
+    return response.status(status).json({
       errors: ['Something went wrong'],
     });
   }

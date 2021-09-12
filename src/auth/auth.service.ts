@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from 'src/jwt/jwt.service';
+import { UserJwtPayload } from 'src/jwt/types/jwt-payload.type';
 import { User } from '.prisma/client';
 
 @Injectable()
@@ -24,10 +25,9 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
-    const payload = { email: user.email, id: user.id, role: user.role };
+  async login(userJwtPayload: UserJwtPayload) {
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.encryptUser(userJwtPayload),
     };
   }
 
