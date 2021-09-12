@@ -15,6 +15,7 @@ services:
       - .env
     volumes:
       - ./:/api
+      - /api/node_modules/
 
   postgres:
     image: postgres:13
