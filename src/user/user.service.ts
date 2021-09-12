@@ -11,6 +11,7 @@ export class UserService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    throw new Error();
     try {
       const createdUser = await this.prismaService.user.create({
         data: createUserDto,
