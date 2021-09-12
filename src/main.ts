@@ -8,6 +8,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
+  console.log('hi');
   Sentry.init({
     dsn: 'https://99c2626090d741d99fd245e85023d9d0@o996703.ingest.sentry.io/5955194',
     integrations: [new RewriteFrames({ root: process.cwd() })],
