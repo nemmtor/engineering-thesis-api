@@ -6,6 +6,7 @@ type Parser = (error: PrismaError) => string[];
 const mapErrorCodeToParser: Record<PrismaErrorCode, Parser> = {
   [PrismaErrorCode.UniqueConstraintViolation]:
     parseUniqueConstraintViolationError,
+  [PrismaErrorCode.RecordNotFound]: parseUniqueConstraintViolationError,
 };
 
 export const parsePrismaError = (error: PrismaError) => {

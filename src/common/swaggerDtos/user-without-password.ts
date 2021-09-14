@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User, UserRole } from '.prisma/client';
 
-export class UserDto implements User {
+export class UserWithoutPassword implements Omit<User, 'password'> {
   @ApiProperty()
   id: string;
 
@@ -18,12 +18,9 @@ export class UserDto implements User {
   email: string;
 
   @ApiProperty()
-  password: string;
-
-  @ApiProperty()
   isActive: boolean;
 
-  @ApiProperty({ enum: UserRole })
+  @ApiProperty({ type: 'string' })
   role: UserRole;
 
   @ApiPropertyOptional({})

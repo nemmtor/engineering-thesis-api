@@ -11,6 +11,10 @@ async function bootstrap() {
     .setTitle('SalesHelper API')
     .setDescription('This is the API documentation for SalesHelper project.')
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'Authorization',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
