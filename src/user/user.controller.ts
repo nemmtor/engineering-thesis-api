@@ -1,72 +1,147 @@
-import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
-import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ErrorDto } from 'src/common/errors/error.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ActiveGuard } from 'src/auth/guards/active.guard';
+import { RequestWithUserJwtPayload } from 'src/auth/types/request-with-user-jwt-payload';
+import { ErrorDto } from 'src/common/errors/error.dto';
+import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { User, UserRole } from '.prisma/client';
+import { UserWithoutPassword } from '../common/swaggerDtos/user-without-password';
+import { PromoteUserDto } from './dto/promote-user.dto';
 import { UserService } from './user.service';
-import { UserDto } from './dto/user.dto';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Post()
-  // @ApiOperation({ summary: 'Creates user' })
-  // @ApiResponse({
-  //   description: 'User created',
-  //   type: UserDto,
-  //   status: 201,
-  // })
-  // @ApiResponse({
-  //   description: 'Bad request',
-  //   status: 400,
-  //   type: ErrorDto,
-  // })
-  // @ApiResponse({
-  //   description: 'Email is already taken',
-  //   status: 409,
-  //   type: ErrorDto,
-  // })
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.userService.create(createUserDto);
-  // }
-
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({
-    type: [UserDto],
+    type: [UserWithoutPassword],
     status: 200,
+    description: 'Success',
   })
+  @ApiResponse({
+    type: ErrorDto,
+    status: 401,
+    description: 'Unuathorized',
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get specific user' })
+  @ApiOperation({ summary: 'Get single user' })
   @ApiParam({
     name: 'id',
     type: 'string',
   })
-  @ApiResponse({ type: UserDto, status: 200 })
-  @ApiResponse({ type: ErrorDto, status: 404 })
+  @ApiResponse({
+    type: UserWithoutPassword,
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({ type: ErrorDto, status: 404, description: 'User not found' })
+  @ApiResponse({
+    type: ErrorDto,
+    status: 401,
+    description: 'Unuathorized',
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id', UserByIdPipe) user: User) {
     return user;
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @ApiOperation({ summary: 'Activate user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    type: ErrorDto,
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Patch('activate/:id')
+  activate(@Param('id') id: string) {
+    return this.userService.activate(id);
+  }
 
-  @UseGuards(JwtAuthGuard, ActiveGuard, RolesGuard)
+  @ApiOperation({ summary: 'Change role of user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    type: ErrorDto,
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Patch('change-role/:id')
+  async changeRole(
+    @Param('id') id: string,
+    @Body() promoteUserDto: PromoteUserDto,
+    @Req() req: RequestWithUserJwtPayload,
+  ) {
+    return this.userService.changeRole(id, promoteUserDto, req.user.role);
+  }
+
+  @ApiOperation({ summary: 'Delete user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    type: ErrorDto,
+    status: 401,
+    description: 'Unuathorized',
+  })
+  @ApiResponse({
+    type: ErrorDto,
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    await this.userService.remove(id);
+  async remove(@Param('id') id: string, @Req() req: RequestWithUserJwtPayload) {
+    await this.userService.remove(id, req.user.role);
   }
 }

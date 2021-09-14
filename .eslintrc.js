@@ -34,5 +34,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "ignoreRestSiblings": true}],
     "curly": "error",
+    'prettier/prettier': 'error',
+    '@typescript-eslint/indent': 'off'
   },
 };
