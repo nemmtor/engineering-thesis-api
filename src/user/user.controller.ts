@@ -15,13 +15,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { User, UserRole } from '@prisma/client';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { RequestWithUserJwtPayload } from 'src/auth/types/request-with-user-jwt-payload';
 import { ErrorDto } from 'src/common/errors/error.dto';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
-import { User, UserRole } from '.prisma/client';
 import { UserWithoutPassword } from '../common/swaggerDtos/user-without-password';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UserService } from './user.service';
