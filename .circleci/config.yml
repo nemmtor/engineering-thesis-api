@@ -1,24 +1,76 @@
+defaults: &workdirAndImage
+  working_directory: ~/workspace
+  docker:
+    - image: circleci/node:14.17.6
+
 version: 2.1
 
+
 jobs:
-  tests:
-    docker:
-      - image: circleci/node:14
+  checkout_code:
+    <<: *workdirAndImage
     steps:
       - checkout
+      - persist_to_workspace:
+          root: ~/workspace
+          paths:
+            - .
+  build:
+    <<: *workdirAndImage
+    working_directory: ~/workspace
+    steps:
+      - attach_workspace:
+          at: ~/workspace
       - restore_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
+          keys:
+          - npm-dependencies-{{ checksum "package-lock.json" }}
+          - npm-dependencies-
       - run:
-          name: Install Dependencies
+          name: Install dependencies
           command: npm install
       - save_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
-            - ./node_modules
+            - ~/workspace/node_modules
+          key: npm-dependencies-{{ checksum "package-lock.json" }}
+      - run:
+          name: Build project
+          command: npm run build
+  test:
+    <<: *workdirAndImage
+    working_directory: ~/workspace
+    steps:
+      - attach_workspace:
+          at: ~/workspace
+      - restore_cache:
+          keys:
+          - npm-dependencies-{{ checksum "package-lock.json" }}
+          - npm-dependencies-
       - run:
           name: Run tests
           command: npm run test
-
+  build_and_push_docker_image:
+    <<: *workdirAndImage
+    steps:
+      - attach_workspace:
+          at: ~/workspace
+      - setup_remote_docker:
+          version: 20.10.6
+      - restore_cache:
+          keys:
+          - npm-dependencies-{{ checksum "package-lock.json" }}
+          - npm-dependencies-
+      - run:
+          name: Build docker image
+          command: docker build -t $DOCKERHUB_IMAGE --platform linux/x86_64 -f ./docker/production/Dockerfile .
+      - run:
+          name: Tag docker image
+          command: docker tag $DOCKERHUB_IMAGE:latest $DOCKERHUB_USERNAME/$DOCKERHUB_IMAGE:latest
+      - run:
+          name: Login to dockerhub
+          command: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+      - run:
+          name: Push docker image
+          command: docker push $DOCKERHUB_USERNAME/$DOCKERHUB_IMAGE:latest
   deploy:
     docker:
       - image: arvindr226/alpine-ssh
@@ -26,37 +78,33 @@ jobs:
       - checkout
       - run: 
           name: Shut down containers
-          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose down"
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose down"
+      - run:
+          name: Update docker-compose file
+          command: scp docker-compose.yml $SSH_USER@$SSH_HOST:/root
       - run: 
-          name: Fetch changes on server
-          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && git fetch --all && git checkout ${CIRCLE_BRANCH} && git reset --hard origin/${CIRCLE_BRANCH}"
+          name: Pull docker images
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose pull"
       - run: 
-          name: Build and start containers
-          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "cd api && docker-compose up --build -d -V"
-
+          name: Start containers
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose up -d"
 workflows:
   version: 2
-  test-and-possible-manual-deploy:
+  build_test_and_deploy:
     jobs:
-      - tests:
+      - checkout_code
+      - build:
+          requires:
+            - checkout_code
+      - test:
+          requires:
+            - build
+      - build_and_push_docker_image:
+          requires:
+            - test
           filters:
             branches:
-              ignore:
-                - main
-      - approve-branch-deploy:
-          requires:
-            - tests
-          type: approval
+              only: main
       - deploy:
           requires:
-            - approve-branch-deploy
-  test-and-deploy:
-    jobs:
-      - tests:
-          filters:
-            branches:
-              only:
-                - main
-      - deploy:
-          requires:
-            - tests
+            - build_and_push_docker_image

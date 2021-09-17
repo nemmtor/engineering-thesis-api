@@ -4,8 +4,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { User, UserRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User, UserRole } from '.prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { mapUserRoleToLevel } from './helpers/map-user-role-to-level';

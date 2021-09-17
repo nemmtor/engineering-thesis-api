@@ -9,5 +9,6 @@ declare namespace NodeJS {
     PGADMIN_DEFAULT_EMAIL: string;
     PGADMIN_DEFAULT_PASSWORD: string;
     PGADMIN_LISTEN_PORT: string;
+    DOCKER_IMAGE_URL: string;
   }
 }

@@ -1,5 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { UserRole } from '.prisma/client';
+import { UserRole } from '@prisma/client';
 import { UserJwtPayload } from '../types/jwt-payload.type';
 
 export function assertIsJwtPayload(

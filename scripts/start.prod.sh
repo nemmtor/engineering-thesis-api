@@ -1,2 +1,2 @@
-npm run prisma:migration-run
-npm run start:prod
+npx run prisma:migration-run
+node dist/main
