@@ -2,10 +2,23 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as helmet from 'helmet';
+import * as Sentry from '@sentry/node';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as Tracing from '@sentry/tracing';
+import { RewriteFrames } from '@sentry/integrations';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
+  Sentry.init({
+    dsn: 'https://33ff01554543479882d0dfad5066294f@o1006423.ingest.sentry.io/5966837',
+
+    tracesSampleRate: 1.0,
+    debug: true,
+    release: process.env.SENTRY_RELEASE,
+    integrations: [new RewriteFrames({ root: __dirname || process.cwd() })],
+  });
+
   const app = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()
     .setTitle('SalesHelper API')
