@@ -35,6 +35,10 @@ jobs:
       - run:
           name: Build project
           command: npm run build
+      - persist_to_workspace:
+          root: ~/workspace
+          paths:
+            - ./dist
   test:
     <<: *workdirAndImage
     working_directory: ~/workspace
@@ -88,6 +92,21 @@ jobs:
       - run: 
           name: Start containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose up -d"
+  upload-sentry-source-maps:
+    docker:
+      - image: getsentry/sentry-cli
+    steps:
+      - attach_workspace:
+          at: ~/workspace
+      - run:
+          name: Create sentry release
+          command: sentry-cli releases new $SENTRY_RELEASE
+      - run:
+          name: Upload sentry source maps
+          command: sentry-cli releases files $SENTRY_RELEASE upload-sourcemaps ~/workspace/dist --url-prefix '~/'
+      - run:
+          name: Upload sentry source maps
+          command: sentry-cli releases finalize $SENTRY_RELEASE
 workflows:
   version: 2
   build_test_and_deploy:
@@ -102,9 +121,12 @@ workflows:
       - build_and_push_docker_image:
           requires:
             - test
-          filters:
-            branches:
-              only: main
+          # filters:
+          #   branches:
+          #     only: main
       - deploy:
           requires:
             - build_and_push_docker_image
+      - upload-sentry-source-maps:
+          requires:
+            - deploy
