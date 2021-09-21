@@ -35,6 +35,10 @@ jobs:
       - run:
           name: Build project
           command: npm run build
+      - persist_to_workspace:
+          root: ~/workspace
+          paths:
+            - ./dist
   test:
     <<: *workdirAndImage
     working_directory: ~/workspace
@@ -61,16 +65,16 @@ jobs:
           - npm-dependencies-
       - run:
           name: Build docker image
-          command: docker build -t $DOCKERHUB_IMAGE --platform linux/x86_64 -f ./docker/production/Dockerfile .
+          command: docker build -t $DOCKER_IMAGE_URL --platform linux/x86_64 -f ./docker/production/Dockerfile .
       - run:
           name: Tag docker image
-          command: docker tag $DOCKERHUB_IMAGE:latest $DOCKERHUB_USERNAME/$DOCKERHUB_IMAGE:latest
+          command: docker tag $DOCKER_IMAGE_URL:latest $DOCKERHUB_USERNAME/$DOCKER_IMAGE_URL:latest
       - run:
           name: Login to dockerhub
           command: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
       - run:
           name: Push docker image
-          command: docker push $DOCKERHUB_USERNAME/$DOCKERHUB_IMAGE:latest
+          command: docker push $DOCKER_IMAGE_URL:latest
   deploy:
     docker:
       - image: arvindr226/alpine-ssh
@@ -79,6 +83,22 @@ jobs:
       - run: 
           name: Shut down containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose down"
+      - run: 
+          name: Remove previous dotenv file
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "rm .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "touch .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'DOCKER_IMAGE_URL=$DOCKER_IMAGE_URL' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public&sslmode=prefer' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'SENTRY_RELEASE=$CIRCLE_SHA1' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'SERVER_SECRET=$SERVER_SECRET' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'SERVER_PORT=$SERVER_PORT' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'POSTGRES_DB=$POSTGRES_DB' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'POSTGRES_USER=$POSTGRES_USER' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'POSTGRES_PASSWORD=$POSTGRES_PASSWORD' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'PGADMIN_DEFAULT_EMAIL=$PGADMIN_DEFAULT_EMAIL' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'PGADMIN_DEFAULT_PASSWORD=$PGADMIN_DEFAULT_PASSWORD' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'PGADMIN_LISTEN_PORT=$PGADMIN_LISTEN_PORT' >> .env"
       - run:
           name: Update docker-compose file
           command: scp docker-compose.yml $SSH_USER@$SSH_HOST:/root
@@ -88,6 +108,24 @@ jobs:
       - run: 
           name: Start containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose up -d"
+      - run:
+          name: Delete unused images
+          command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker image prune -f"
+  upload-sentry-source-maps:
+    docker:
+      - image: getsentry/sentry-cli
+    steps:
+      - attach_workspace:
+          at: ~/workspace
+      - run:
+          name: Create sentry release
+          command: sentry-cli releases new $CIRCLE_SHA1
+      - run:
+          name: Upload sentry source maps
+          command: sentry-cli releases files $CIRCLE_SHA1 upload-sourcemaps ~/workspace/dist --url-prefix '~/'
+      - run:
+          name: Upload sentry source maps
+          command: sentry-cli releases finalize $CIRCLE_SHA1
 workflows:
   version: 2
   build_test_and_deploy:
@@ -108,3 +146,6 @@ workflows:
       - deploy:
           requires:
             - build_and_push_docker_image
+      - upload-sentry-source-maps:
+          requires:
+            - deploy
