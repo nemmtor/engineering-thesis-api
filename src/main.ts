@@ -14,8 +14,8 @@ async function bootstrap() {
     dsn: 'https://33ff01554543479882d0dfad5066294f@o1006423.ingest.sentry.io/5966837',
 
     tracesSampleRate: 1.0,
-    debug: true,
     release: process.env.SENTRY_RELEASE,
+    attachStacktrace: true,
     integrations: [new RewriteFrames({ root: __dirname || process.cwd() })],
   });
 
