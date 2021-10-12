@@ -16,7 +16,10 @@ async function bootstrap() {
     tracesSampleRate: 1.0,
     release: process.env.SENTRY_RELEASE,
     attachStacktrace: true,
-    integrations: [new RewriteFrames({ root: __dirname || process.cwd() })],
+    integrations: [
+      new RewriteFrames({ root: __dirname || process.cwd() }),
+      new Sentry.Integrations.Http({ tracing: true }),
+    ],
   });
 
   const app = await NestFactory.create(AppModule);
