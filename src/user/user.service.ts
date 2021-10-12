@@ -4,14 +4,16 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User, UserRole } from '@prisma/client';
+import { Prisma, User, UserRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { mapUserRoleToLevel } from './helpers/map-user-role-to-level';
-
-type UserSelect = Record<keyof Omit<User, 'password'>, boolean>;
-type UserWithoutPassword = Omit<User, 'password'>;
+import {
+  UserSelect,
+  UsersQueryParams,
+  UserWithoutPassword,
+} from './user.types';
 
 const userSelect: UserSelect = {
   avatarUrl: true,
@@ -41,9 +43,20 @@ export class UserService {
     }
   }
 
-  findAll() {
+  findAll(query: UsersQueryParams) {
+    const where: Prisma.UserWhereInput = {};
+
+    if (query.email) {
+      where.email = query.email;
+    }
+
+    if (query.name) {
+      where.name = query.name;
+    }
+
     return this.prismaService.user.findMany({
       select: userSelect,
+      where,
     });
   }
 

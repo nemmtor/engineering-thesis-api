@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -25,14 +27,17 @@ import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { UserWithoutPassword } from '../common/swaggerDtos/user-without-password';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UserService } from './user.service';
+import { UsersQueryParams } from './user.types';
 
 @ApiTags('User')
 @Controller('user')
-export class UserController {
+export class UsersController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
+  @ApiQuery({ name: 'name', type: 'string' })
+  @ApiQuery({ name: 'email', type: 'string' })
   @ApiResponse({
     type: [UserWithoutPassword],
     status: 200,
@@ -45,8 +50,8 @@ export class UserController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() query: UsersQueryParams) {
+    return this.userService.findAll(query);
   }
 
   @Get(':id')
