@@ -144,6 +144,8 @@ workflows:
             branches:
               ignore: main
       - build_and_push_docker_image:
+          requires:
+            - checkout_code
           filters:
             branches:
               only: main
