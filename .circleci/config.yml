@@ -134,12 +134,18 @@ workflows:
       - build:
           requires:
             - checkout_code
+          filters:
+            branches:
+              ignore: main
       - test:
           requires:
             - build
+          filters:
+            branches:
+              ignore: main
       - build_and_push_docker_image:
           requires:
-            - test
+            - checkout_code
           filters:
             branches:
               only: main
