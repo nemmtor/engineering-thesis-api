@@ -153,3 +153,6 @@ workflows:
           requires:
             - build
             - deploy
+          filters:
+            branches:
+              only: main
