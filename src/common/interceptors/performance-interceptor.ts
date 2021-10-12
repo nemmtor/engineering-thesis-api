@@ -5,9 +5,9 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
+import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Request } from 'supertest';
 
 @Injectable()
 export class PerformanceInterceptor implements NestInterceptor {
