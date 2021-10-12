@@ -36,8 +36,8 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
-  @ApiQuery({ name: 'name', type: 'string' })
-  @ApiQuery({ name: 'email', type: 'string' })
+  @ApiQuery({ name: 'name', type: 'string', required: false })
+  @ApiQuery({ name: 'email', type: 'string', required: false })
   @ApiResponse({
     type: [UserWithoutPassword],
     status: 200,
