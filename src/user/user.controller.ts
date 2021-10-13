@@ -26,6 +26,8 @@ import { ErrorDto } from 'src/common/errors/error.dto';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { UserWithoutPassword } from '../common/swaggerDtos/user-without-password';
 import { PromoteUserDto } from './dto/promote-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto copy';
+import { SelfGuard } from './guards/self.guard';
 import { UserService } from './user.service';
 import { UsersQueryParams } from './user.types';
 
@@ -34,7 +36,6 @@ import { UsersQueryParams } from './user.types';
 export class UsersController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiQuery({ name: 'name', type: 'string', required: false })
   @ApiQuery({ name: 'email', type: 'string', required: false })
@@ -50,11 +51,11 @@ export class UsersController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtAuthGuard)
+  @Get()
   findAll(@Query() query: UsersQueryParams) {
     return this.userService.findAll(query);
   }
 
-  @Get(':id')
   @ApiOperation({ summary: 'Get single user' })
   @ApiParam({
     name: 'id',
@@ -73,8 +74,63 @@ export class UsersController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtAuthGuard)
+  @Get(':id')
   findOne(@Param('id', UserByIdPipe) user: User) {
     return user;
+  }
+
+  @ApiOperation({ summary: 'Update user' })
+  @ApiResponse({
+    type: [UserWithoutPassword],
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    type: ErrorDto,
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard, SelfGuard)
+  @Patch(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id, updateUserDto);
+  }
+
+  @ApiOperation({ summary: 'Delete user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    type: ErrorDto,
+    status: 401,
+    description: 'Unuathorized',
+  })
+  @ApiResponse({
+    type: ErrorDto,
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Req() req: RequestWithUserJwtPayload) {
+    await this.userService.remove(id, req.user.role);
   }
 
   @ApiOperation({ summary: 'Activate user' })
@@ -125,28 +181,5 @@ export class UsersController {
     @Req() req: RequestWithUserJwtPayload,
   ) {
     return this.userService.changeRole(id, promoteUserDto, req.user.role);
-  }
-
-  @ApiOperation({ summary: 'Delete user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success',
-  })
-  @ApiResponse({
-    type: ErrorDto,
-    status: 401,
-    description: 'Unuathorized',
-  })
-  @ApiResponse({
-    type: ErrorDto,
-    status: 404,
-    description: 'User not found',
-  })
-  @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: RequestWithUserJwtPayload) {
-    await this.userService.remove(id, req.user.role);
   }
 }
