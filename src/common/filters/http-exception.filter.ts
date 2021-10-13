@@ -9,6 +9,7 @@ import { isPrismaError } from 'src/prisma/errors/is-prisma-error';
 import { parsePrismaError } from 'src/prisma/errors/parse-prisma-error';
 import { objectHasMessageField } from '../utils/object-has-message-field';
 
+// TODO: Refactor this
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
