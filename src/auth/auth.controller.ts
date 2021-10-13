@@ -6,14 +6,14 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ErrorDto } from 'src/common/errors/error.dto';
 import { UserLoginRequest } from 'src/docs/swaggerDtos/user-login-request';
 import { UserLoginResponse } from 'src/docs/swaggerDtos/user-login-response';
 import { UserWithoutPassword } from 'src/docs/swaggerDtos/user-without-password';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
+import { ErrorDto } from 'src/docs/swaggerDtos/error';
 import { AuthService } from './auth.service';
-import { RequestWithUser } from './auth.types';
+import { RequestWithUser, RequestWithUserId } from './auth.types';
 import { JwtGuard } from '../jwt/guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
 
@@ -61,8 +61,10 @@ export class AuthController {
   @ApiBody({ type: UserLoginRequest })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req: RequestWithUser) {
-    return this.authService.login(req.user);
+  async login(@Req() req: RequestWithUserId) {
+    const jwtPayload = req.user;
+
+    return this.authService.login(jwtPayload);
   }
 
   @ApiOperation({ summary: 'Get current logged user' })
