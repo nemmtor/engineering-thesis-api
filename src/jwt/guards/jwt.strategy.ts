@@ -1,8 +1,8 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { assertIsJwtPayload } from 'src/jwt/helpers/assert-is-jwt-payload';
 import { UserService } from 'src/user/user.service';
+import { assertIsValidJwt } from '../helpers/assert-is-valid-jwt';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: unknown) {
-    assertIsJwtPayload(payload);
+    assertIsValidJwt(payload);
 
     return this.userService.findOne(payload.id);
   }
