@@ -87,6 +87,7 @@ export class UserService {
     return user;
   }
 
+  // TODO: update updatedAt
   async update(id: string, { email, name }: UpdateUserDto) {
     try {
       const updatedUser = await this.prismaService.user.update({
