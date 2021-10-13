@@ -2,14 +2,13 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma, User, UserRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
-import { mapUserRoleToLevel } from './helpers/map-user-role-to-level';
+import { checkRolePermission } from './helpers/check-role-permission';
 import {
   UserSelect,
   UsersQueryParams,
@@ -88,11 +87,12 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, { email, name }: UpdateUserDto) {
     try {
       const updatedUser = await this.prismaService.user.update({
         where: { id },
-        data: updateUserDto,
+        data: { email, name },
+        select: userSelect,
       });
 
       return updatedUser;
@@ -104,23 +104,11 @@ export class UserService {
   async remove(id: string, requestingUserRole: UserRole) {
     const user = await this.findOne(id);
 
-    await this.checkRolePermission(requestingUserRole, user.role);
+    checkRolePermission(requestingUserRole, user.role);
 
     await this.prismaService.user.delete({
       where: { id },
     });
-  }
-
-  async checkRolePermission(
-    requestingUserRole: UserRole,
-    targetUserRole: UserRole,
-  ) {
-    const requestingUserLevel = mapUserRoleToLevel[requestingUserRole];
-    const targetUserLevel = mapUserRoleToLevel[targetUserRole];
-
-    if (requestingUserLevel <= targetUserLevel) {
-      throw new UnauthorizedException();
-    }
   }
 
   async changeRole(
@@ -130,7 +118,7 @@ export class UserService {
   ) {
     const user = await this.findOne(id);
 
-    await this.checkRolePermission(requestingUserRole, user.role);
+    checkRolePermission(requestingUserRole, user.role);
 
     return this.prismaService.user.update({
       where: { id },
