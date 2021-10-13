@@ -8,6 +8,7 @@ import { Prisma, User, UserRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PromoteUserDto } from './dto/promote-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto copy';
 import { mapUserRoleToLevel } from './helpers/map-user-role-to-level';
 import {
   UserSelect,
@@ -73,19 +74,6 @@ export class UserService {
     return user;
   }
 
-  async findOneByEmail(email: string): Promise<UserWithoutPassword> {
-    const user = await this.prismaService.user.findUnique({
-      where: { email },
-      select: userSelect,
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
-  }
-
   // Only for login purposes
   async findOneByEmailWithPassword(email: string): Promise<User> {
     const user = await this.prismaService.user.findUnique({
@@ -100,9 +88,18 @@ export class UserService {
     return user;
   }
 
-  // update(id: number, updateUserDto: UpdateUserDto) {
-  //   return `This action updates a #${id} user`;
-  // }
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      const updatedUser = await this.prismaService.user.update({
+        where: { id },
+        data: updateUserDto,
+      });
+
+      return updatedUser;
+    } catch (e) {
+      throw new ConflictException(e);
+    }
+  }
 
   async remove(id: string, requestingUserRole: UserRole) {
     const user = await this.findOne(id);
