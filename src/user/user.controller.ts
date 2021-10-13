@@ -18,13 +18,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User, UserRole } from '@prisma/client';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { RequestWithUserJwtPayload } from 'src/auth/types/request-with-user-jwt-payload';
+import { RequestWithUser } from 'src/auth/auth.types';
+import { Roles } from 'src/common/guards/roles/roles.decorator';
+import { JwtGuard } from 'src/jwt/guards/jwt.guard';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ErrorDto } from 'src/common/errors/error.dto';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
-import { UserWithoutPassword } from '../common/swaggerDtos/user-without-password';
+import { UserWithoutPassword } from '../docs/swaggerDtos/user-without-password';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
 import { SelfGuard } from './guards/self.guard';
@@ -50,7 +50,7 @@ export class UsersController {
     description: 'Unuathorized',
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   @Get()
   findAll(@Query() query: UsersQueryParams) {
     return this.userService.findAll(query);
@@ -73,7 +73,7 @@ export class UsersController {
     description: 'Unuathorized',
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   @Get(':id')
   findOne(@Param('id', UserByIdPipe) user: User) {
     return user;
@@ -101,7 +101,7 @@ export class UsersController {
     type: ErrorDto,
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard, SelfGuard)
+  @UseGuards(JwtGuard, SelfGuard)
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
@@ -126,10 +126,11 @@ export class UsersController {
     description: 'User not found',
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: RequestWithUserJwtPayload) {
+  async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
+    // TODO: checkRolePermissions here ? maybe as a guard
     await this.userService.remove(id, req.user.role);
   }
 
@@ -149,7 +150,7 @@ export class UsersController {
     type: ErrorDto,
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Patch('activate/:id')
   activate(@Param('id') id: string) {
@@ -172,14 +173,15 @@ export class UsersController {
     type: ErrorDto,
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Patch('change-role/:id')
   async changeRole(
     @Param('id') id: string,
     @Body() promoteUserDto: PromoteUserDto,
-    @Req() req: RequestWithUserJwtPayload,
+    @Req() req: RequestWithUser,
   ) {
+    // TODO: checkRolePermissions here ? maybe as a guard
     return this.userService.changeRole(id, promoteUserDto, req.user.role);
   }
 }

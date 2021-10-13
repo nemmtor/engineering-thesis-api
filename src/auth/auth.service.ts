@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from 'src/jwt/jwt.service';
 import { UserJwtPayload } from 'src/jwt/types/jwt-payload.type';
 import { User } from '@prisma/client';
+import { UserWithoutPassword } from 'src/user/user.types';
 
 @Injectable()
 export class AuthService {
@@ -13,8 +14,12 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string) {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserWithoutPassword> {
     let user: User;
+
     try {
       user = await this.userService.findOneByEmailWithPassword(email);
     } catch (e) {
@@ -31,7 +36,9 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return user;
+    const { password: removedPassword, ...userWithoutPassword } = user;
+
+    return userWithoutPassword;
   }
 
   async login(userJwtPayload: UserJwtPayload) {
