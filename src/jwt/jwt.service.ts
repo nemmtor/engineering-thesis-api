@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
-import { UserJwtPayload } from './types/jwt-payload.type';
-import { assertIsJwtPayload } from './helpers/assert-is-jwt-payload';
+import { assertIsValidJwt } from './helpers/assert-is-valid-jwt';
+import { UserJwtPayload } from './jwt.types';
 
 @Injectable()
 export class JwtService {
@@ -14,7 +14,7 @@ export class JwtService {
   decryptUser(token: string): UserJwtPayload {
     const encryptedToken = this.nestJwtService.decode(token);
 
-    assertIsJwtPayload(encryptedToken);
+    assertIsValidJwt(encryptedToken);
 
     return encryptedToken;
   }
