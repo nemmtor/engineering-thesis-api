@@ -7,7 +7,7 @@ import {
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 import { httpCodeToSentryStatus } from './http-code-to-sentry-status';
 
 @Injectable()
@@ -34,9 +34,8 @@ export class PerformanceInterceptor implements NestInterceptor {
       op: 'http',
       name: request.url,
     });
-
     return next.handle().pipe(
-      tap(() => {
+      finalize(() => {
         const response: Response = context.switchToHttp().getResponse();
 
         transaction.setHttpStatus(response.statusCode);
