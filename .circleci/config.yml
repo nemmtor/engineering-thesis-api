@@ -125,7 +125,10 @@ jobs:
           name: Upload sentry source maps
           command: sentry-cli releases files $CIRCLE_SHA1 upload-sourcemaps ~/workspace/dist --url-prefix '~/'
       - run:
-          name: Upload sentry source maps
+          name: Integrate commits
+          command: sentry-cli releases set-commits "$CIRCLE_SHA1" --auto
+      - run:
+          name: Finalize release
           command: sentry-cli releases finalize $CIRCLE_SHA1
 workflows:
   version: 2
