@@ -117,6 +117,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/workspace
+      - checkout
       - run:
           name: Create sentry release
           command: sentry-cli releases new $CIRCLE_SHA1
