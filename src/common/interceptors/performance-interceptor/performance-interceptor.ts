@@ -5,9 +5,10 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { httpCodeToSentryStatus } from './http-code-to-sentry-status';
 
 @Injectable()
 export class PerformanceInterceptor implements NestInterceptor {
@@ -34,13 +35,18 @@ export class PerformanceInterceptor implements NestInterceptor {
       name: request.url,
     });
 
-    transaction.setStatus('ok');
-
     return next.handle().pipe(
       tap(() => {
-        // TODO: Map error code to sentry message
-        // const response: Response = context.switchToHttp().getResponse();
-        // transaction.setStatus('unauthenticated');
+        const response: Response = context.switchToHttp().getResponse();
+
+        transaction.setHttpStatus(response.statusCode);
+
+        transaction.setStatus(httpCodeToSentryStatus(response.statusCode));
+
+        if (request.user) {
+          transaction.setData('user', request.user);
+        }
+
         transaction.finish();
       }),
     );
