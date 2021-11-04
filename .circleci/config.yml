@@ -124,9 +124,6 @@ jobs:
       - run:
           name: Delete unused images
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker image prune -f"
-      - slack/status:
-          fail_only: false
-          mentions: 'Kacper'
   upload-sentry-source-maps:
     docker:
       - image: getsentry/sentry-cli
@@ -146,6 +143,13 @@ jobs:
       - run:
           name: Finalize release
           command: sentry-cli releases finalize $CIRCLE_SHA1
+  send-slack-success-message:
+    <<: *workdirAndImage
+    steps:
+    - slack/notify:
+          color: "#42e2f4"
+          mentions: "Kacper,"
+          message: Deployment successfull
 workflows:
   version: 2
   build_test_and_deploy:
@@ -176,3 +180,6 @@ workflows:
           filters:
             branches:
               only: main
+      - send-slack-success-message:
+          requires:
+            - upload-sentry-source-maps
