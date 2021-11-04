@@ -143,6 +143,9 @@ jobs:
       - run:
           name: Finalize release
           command: sentry-cli releases finalize $CIRCLE_SHA1
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
 workflows:
   version: 2
   build_test_and_deploy:
