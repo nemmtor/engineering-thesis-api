@@ -1,4 +1,4 @@
-FROM node:14-alpine AS builder
+FROM node:14.18-alpine AS builder
 
 WORKDIR /api
 
@@ -12,7 +12,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:14-alpine AS production
+FROM node:14.18-alpine AS production
 
 COPY --from=builder /api/node_modules ./node_modules
 COPY --from=builder /api/package*.json ./
