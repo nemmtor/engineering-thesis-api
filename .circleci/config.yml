@@ -40,10 +40,9 @@ jobs:
           root: ~/workspace
           paths:
             - ./dist
-      - slack/notify:
-          color: '#42e2f4'
-          mentions: 'Kacper,'
-          message: A custom message to notify the channel about the latest build
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
   test:
     <<: *workdirAndImage
     working_directory: ~/workspace
@@ -57,6 +56,9 @@ jobs:
       - run:
           name: Run tests
           command: npm run test
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
   build_and_push_docker_image:
     <<: *workdirAndImage
     steps:
@@ -80,6 +82,9 @@ jobs:
       - run:
           name: Push docker image
           command: docker push $DOCKER_IMAGE_URL:latest
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
   deploy:
     docker:
       - image: arvindr226/alpine-ssh
@@ -116,6 +121,9 @@ jobs:
       - run:
           name: Delete unused images
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker image prune -f"
+      - slack/status:
+          fail_only: false
+          mentions: 'Kacper'
   upload-sentry-source-maps:
     docker:
       - image: getsentry/sentry-cli
@@ -135,6 +143,9 @@ jobs:
       - run:
           name: Finalize release
           command: sentry-cli releases finalize $CIRCLE_SHA1
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
 workflows:
   version: 2
   build_test_and_deploy:
