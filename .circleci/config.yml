@@ -91,6 +91,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install curl
+          command: apt install curl
+      - run:
           name: Shut down containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose down"
       - run:
