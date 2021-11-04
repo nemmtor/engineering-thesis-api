@@ -4,7 +4,8 @@ defaults: &workdirAndImage
     - image: circleci/node:14.17.6
 
 version: 2.1
-
+orbs:
+  slack: circleci/slack@3.4.2
 
 jobs:
   checkout_code:
@@ -23,8 +24,8 @@ jobs:
           at: ~/workspace
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            - npm-dependencies-
       - run:
           name: Install dependencies
           command: npm install
@@ -39,6 +40,9 @@ jobs:
           root: ~/workspace
           paths:
             - ./dist
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
   test:
     <<: *workdirAndImage
     working_directory: ~/workspace
@@ -47,11 +51,14 @@ jobs:
           at: ~/workspace
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            - npm-dependencies-
       - run:
           name: Run tests
           command: npm run test
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
   build_and_push_docker_image:
     <<: *workdirAndImage
     steps:
@@ -61,8 +68,8 @@ jobs:
           version: 20.10.6
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            - npm-dependencies-
       - run:
           name: Build docker image
           command: docker build -t $DOCKER_IMAGE_URL --platform linux/x86_64 -f ./docker/production/Dockerfile .
@@ -75,15 +82,18 @@ jobs:
       - run:
           name: Push docker image
           command: docker push $DOCKER_IMAGE_URL:latest
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
   deploy:
     docker:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run: 
+      - run:
           name: Shut down containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose down"
-      - run: 
+      - run:
           name: Remove previous dotenv file
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "rm .env"
       - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "touch .env"
@@ -102,15 +112,18 @@ jobs:
       - run:
           name: Update docker-compose file
           command: scp docker-compose.yml $SSH_USER@$SSH_HOST:/root
-      - run: 
+      - run:
           name: Pull docker images
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose pull"
-      - run: 
+      - run:
           name: Start containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose up -d"
       - run:
           name: Delete unused images
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker image prune -f"
+      - slack/status:
+          fail_only: false
+          mentions: 'Kacper'
   upload-sentry-source-maps:
     docker:
       - image: getsentry/sentry-cli
@@ -130,6 +143,9 @@ jobs:
       - run:
           name: Finalize release
           command: sentry-cli releases finalize $CIRCLE_SHA1
+      - slack/status:
+          fail_only: true
+          mentions: 'Kacper'
 workflows:
   version: 2
   build_test_and_deploy:
