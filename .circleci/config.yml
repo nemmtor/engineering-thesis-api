@@ -4,7 +4,8 @@ defaults: &workdirAndImage
     - image: circleci/node:14.17.6
 
 version: 2.1
-
+orbs:
+  slack: circleci/slack@3.4.2
 
 jobs:
   checkout_code:
@@ -23,8 +24,8 @@ jobs:
           at: ~/workspace
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            - npm-dependencies-
       - run:
           name: Install dependencies
           command: npm install
@@ -39,6 +40,10 @@ jobs:
           root: ~/workspace
           paths:
             - ./dist
+      - slack/notify:
+          color: '#42e2f4'
+          mentions: 'Kacper,'
+          message: A custom message to notify the channel about the latest build
   test:
     <<: *workdirAndImage
     working_directory: ~/workspace
@@ -47,8 +52,8 @@ jobs:
           at: ~/workspace
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            - npm-dependencies-
       - run:
           name: Run tests
           command: npm run test
@@ -61,8 +66,8 @@ jobs:
           version: 20.10.6
       - restore_cache:
           keys:
-          - npm-dependencies-{{ checksum "package-lock.json" }}
-          - npm-dependencies-
+            - npm-dependencies-{{ checksum "package-lock.json" }}
+            - npm-dependencies-
       - run:
           name: Build docker image
           command: docker build -t $DOCKER_IMAGE_URL --platform linux/x86_64 -f ./docker/production/Dockerfile .
@@ -80,10 +85,10 @@ jobs:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run: 
+      - run:
           name: Shut down containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose down"
-      - run: 
+      - run:
           name: Remove previous dotenv file
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "rm .env"
       - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "touch .env"
@@ -102,10 +107,10 @@ jobs:
       - run:
           name: Update docker-compose file
           command: scp docker-compose.yml $SSH_USER@$SSH_HOST:/root
-      - run: 
+      - run:
           name: Pull docker images
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose pull"
-      - run: 
+      - run:
           name: Start containers
           command: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "docker-compose up -d"
       - run:
