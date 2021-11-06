@@ -127,7 +127,7 @@ export class UsersController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Roles(UserRole.MANAGER)
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     // TODO: checkRolePermissions here ? maybe as a guard
@@ -151,7 +151,7 @@ export class UsersController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Roles(UserRole.MANAGER)
   @Patch('activate/:id')
   activate(@Param('id') id: string) {
     return this.userService.activate(id);
@@ -174,7 +174,7 @@ export class UsersController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Roles( UserRole.MANAGER)
   @Patch('change-role/:id')
   async changeRole(
     @Param('id') id: string,
