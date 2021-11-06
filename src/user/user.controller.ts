@@ -92,7 +92,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden',
+    description: 'Forbidden resource',
     type: ErrorDto,
   })
   @ApiResponse({

@@ -81,6 +81,11 @@ export class AuthController {
     type: ErrorDto,
     status: 401,
   })
+  @ApiResponse({
+    description: 'Forbidden resource',
+    type: ErrorDto,
+    status: 403,
+  })
   @ApiBody({ type: UserLoginRequest })
   @UseGuards(LocalAuthGuard, RolesGuard)
   @Roles(UserRole.SALES_REPRESENTATIVE)
