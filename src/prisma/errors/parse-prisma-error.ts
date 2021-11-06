@@ -1,3 +1,5 @@
+import { InternalServerErrorException } from '@nestjs/common';
+import * as Sentry from '@sentry/node';
 import { parseUniqueConstraintViolationError } from './parse-unique-constraint-error';
 import { PrismaError, PrismaErrorCode } from './prisma-error.type';
 
@@ -10,5 +12,11 @@ const mapErrorCodeToParser: Record<PrismaErrorCode, Parser> = {
 };
 
 export const parsePrismaError = (error: PrismaError) => {
-  return mapErrorCodeToParser[error.code](error);
+  const parser = mapErrorCodeToParser[error.code];
+  if (parser) {
+    return parser(error);
+  }
+
+  Sentry.captureException(`Unhandled prisma error: ${error}`);
+  return ['Unhandled prisma error'];
 };
