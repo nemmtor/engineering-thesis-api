@@ -16,6 +16,9 @@ import { AuthService } from './auth.service';
 import { RequestWithUser, RequestWithUserId } from './auth.types';
 import { JwtGuard } from '../jwt/guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/common/guards/roles/roles.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -65,6 +68,32 @@ export class AuthController {
     const jwtPayload = req.user;
 
     return this.authService.login(jwtPayload);
+  }
+
+  @ApiOperation({ summary: 'Login for mobile app' })
+  @ApiResponse({
+    description: 'Success',
+    type: UserLoginResponse,
+    status: 201,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Forbidden resource',
+    type: ErrorDto,
+    status: 403,
+  })
+  @ApiBody({ type: UserLoginRequest })
+  @UseGuards(LocalAuthGuard, RolesGuard)
+  @Roles(UserRole.SALES_REPRESENTATIVE)
+  @Post('login-mobile')
+  async loginMobile(@Req() req: RequestWithUser) {
+    const { id } = req.user;
+
+    return this.authService.login({ id });
   }
 
   @ApiOperation({ summary: 'Get current logged user' })
