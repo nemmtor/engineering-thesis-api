@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/node';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from '@sentry/tracing';
 import { RewriteFrames } from '@sentry/integrations';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -22,7 +23,9 @@ async function bootstrap() {
     ],
   });
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
+
   const config = new DocumentBuilder()
     .setTitle('SalesHelper API')
     .setDescription('This is the API documentation for SalesHelper project.')
@@ -38,7 +41,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors({
-    origin: 'https://after-sale-app.vercel.app',
+    origin: 'https://after-sale.pl',
     credentials: true,
   });
 
