@@ -82,10 +82,29 @@ export class AuthController {
       .status(201)
       .cookie('access_token', resBody.accessToken, {
         httpOnly: true,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        sameSite: false,
         secure: true,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .json(resBody);
+  }
+
+  @ApiOperation({ summary: 'Logout' })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+  })
+  @Post('logout')
+  async logout(@Res() response: Response) {
+    response
+      .status(200)
+      .clearCookie('accessToken', {
+        httpOnly: true,
+        sameSite: false,
+        secure: true,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      })
+      .send();
   }
 
   @ApiOperation({ summary: 'Login for mobile app' })

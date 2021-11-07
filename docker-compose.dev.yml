@@ -22,7 +22,7 @@ services:
     container_name: postgres-dev
     restart: always
     env_file:
-      - .env.dev
+      - .env
     volumes:
       - postgres-dev:/var/lib/postgresql/data
   

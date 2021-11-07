@@ -37,6 +37,10 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document);
 
   app.use(helmet());
+  app.enableCors({
+    origin: 'https://after-sale.pl',
+    credentials: true,
+  });
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
