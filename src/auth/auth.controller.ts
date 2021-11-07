@@ -82,8 +82,9 @@ export class AuthController {
       .status(201)
       .cookie('access_token', resBody.accessToken, {
         httpOnly: true,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        sameSite: false,
         secure: true,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .json(resBody);
   }
@@ -99,8 +100,8 @@ export class AuthController {
       .status(200)
       .clearCookie('accessToken', {
         httpOnly: true,
-        secure: true,
         sameSite: false,
+        secure: true,
         expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .send();
