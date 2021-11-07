@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -12,13 +20,14 @@ import { UserWithoutPassword } from 'src/docs/swaggerDtos/user-without-password'
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { ErrorDto } from 'src/docs/swaggerDtos/error';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/common/guards/roles/roles.decorator';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RequestWithUser, RequestWithUserId } from './auth.types';
 import { JwtGuard } from '../jwt/guards/jwt.guard';
 import { LocalAuthGuard } from './guards/local.guard';
-import { RolesGuard } from 'src/common/guards/roles/roles.guard';
-import { UserRole } from '@prisma/client';
-import { Roles } from 'src/common/guards/roles/roles.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -64,10 +73,19 @@ export class AuthController {
   @ApiBody({ type: UserLoginRequest })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req: RequestWithUserId) {
+  async login(@Req() req: RequestWithUserId, @Res() response: Response) {
     const jwtPayload = req.user;
 
-    return this.authService.login(jwtPayload);
+    const resBody = await this.authService.login(jwtPayload);
+
+    response
+      .status(201)
+      .cookie('access_token', resBody.accessToken, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        secure: true,
+      })
+      .json(resBody);
   }
 
   @ApiOperation({ summary: 'Login for mobile app' })
