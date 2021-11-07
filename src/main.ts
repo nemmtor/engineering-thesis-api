@@ -38,7 +38,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors({
-    origin: ['localhost:4000', 'https://after-sale.pl'],
+    origin: 'https://after-sale.pl',
     credentials: true,
   });
 
