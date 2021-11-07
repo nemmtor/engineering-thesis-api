@@ -83,7 +83,6 @@ export class AuthController {
       .cookie('accessToken', resBody.accessToken, {
         sameSite: 'none',
         secure: true,
-        domain: 'api.after-sale.pl',
         expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .json(resBody);
@@ -101,7 +100,6 @@ export class AuthController {
       .clearCookie('accessToken', {
         sameSite: 'none',
         secure: true,
-        domain: 'api.after-sale.pl',
         expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
       })
       .send();

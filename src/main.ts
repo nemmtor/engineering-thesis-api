@@ -6,9 +6,7 @@ import * as Sentry from '@sentry/node';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from '@sentry/tracing';
 import { RewriteFrames } from '@sentry/integrations';
-import {
-  NestExpressApplication,
-} from '@nestjs/platform-express';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
