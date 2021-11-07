@@ -38,7 +38,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors({
-    origin: 'https://after-sale.pl',
+    origin: 'https://after-sale-app.vercel.app/',
     credentials: true,
   });
 
