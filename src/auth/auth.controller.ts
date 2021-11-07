@@ -88,6 +88,24 @@ export class AuthController {
       .json(resBody);
   }
 
+  @ApiOperation({ summary: 'Logout' })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+  })
+  @Post('logout')
+  async logout(@Res() response: Response) {
+    response
+      .status(200)
+      .clearCookie('accessToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: false,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      })
+      .send();
+  }
+
   @ApiOperation({ summary: 'Login for mobile app' })
   @ApiResponse({
     description: 'Success',
