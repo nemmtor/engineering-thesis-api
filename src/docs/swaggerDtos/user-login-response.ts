@@ -3,7 +3,7 @@ import { UserWithoutPassword } from './user-without-password';
 
 export class UserLoginResponse {
   @ApiProperty()
-  token: string;
+  accessToken: string;
 
   @ApiProperty()
   user: UserWithoutPassword;
