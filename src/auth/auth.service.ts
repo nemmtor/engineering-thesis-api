@@ -44,6 +44,7 @@ export class AuthService {
   async login(userJwtPayload: UserJwtPayload) {
     return {
       accessToken: this.jwtService.encryptUser(userJwtPayload),
+      user: await this.userService.findOne(userJwtPayload.id),
     };
   }
 
