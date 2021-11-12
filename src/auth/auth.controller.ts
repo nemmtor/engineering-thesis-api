@@ -83,8 +83,8 @@ export class AuthController {
       .cookie('accessToken', resBody.accessToken, {
         httpOnly: true,
         sameSite: false,
-        secure: true,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        secure: process.env.ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 24,
       })
       .json(resBody);
   }
@@ -101,8 +101,7 @@ export class AuthController {
       .clearCookie('accessToken', {
         httpOnly: true,
         sameSite: false,
-        secure: true,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        secure: process.env.ENV === 'production',
       })
       .send();
   }
