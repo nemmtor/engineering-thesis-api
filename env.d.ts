@@ -12,6 +12,7 @@ declare namespace NodeJS {
     DOCKER_IMAGE_URL: string;
     SENTRY_ENVIRONMENT: string;
     SENTRY_RELEASE: string;
-    SENTRY_AUTH_TOKEN: string;
+    APP_DOMAIN: string;
+    ENV: string;
   }
 }

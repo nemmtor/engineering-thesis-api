@@ -80,7 +80,7 @@ export class AuthController {
 
     response
       .status(201)
-      .cookie('access_token', resBody.accessToken, {
+      .cookie('accessToken', resBody.accessToken, {
         httpOnly: true,
         sameSite: false,
         secure: true,
