@@ -38,7 +38,10 @@ async function bootstrap() {
 
   app.use(helmet());
   app.enableCors({
-    origin: 'https://after-sale.pl',
+    origin:
+      process.env.ENV === 'production'
+        ? `https://${process.env.APP_DOMAIN}`
+        : `http://${process.env.APP_DOMAIN}`,
     credentials: true,
   });
 
