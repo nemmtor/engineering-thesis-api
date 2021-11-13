@@ -83,6 +83,7 @@ export class AuthController {
       .cookie('accessToken', resBody.accessToken, {
         httpOnly: true,
         sameSite: false,
+        domain: process.env.ENV === 'production' ? 'after-sale.pl' : undefined,
         secure: process.env.ENV === 'production',
         maxAge: 1000 * 60 * 60 * 24,
       })
@@ -101,6 +102,7 @@ export class AuthController {
       .clearCookie('accessToken', {
         httpOnly: true,
         sameSite: false,
+        domain: process.env.ENV === 'production' ? 'after-sale.pl' : undefined,
         secure: process.env.ENV === 'production',
       })
       .send();
