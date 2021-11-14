@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as helmet from 'helmet';
 import * as Sentry from '@sentry/node';
+import * as cookieParser from 'cookie-parser';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as Tracing from '@sentry/tracing';
 import { RewriteFrames } from '@sentry/integrations';
@@ -44,6 +45,7 @@ async function bootstrap() {
         : `http://${process.env.APP_DOMAIN}`,
     credentials: true,
   });
+  app.use(cookieParser());
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
