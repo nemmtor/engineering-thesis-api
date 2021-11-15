@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseBoolPipe,
   Patch,
   Query,
   Req,
@@ -25,6 +24,7 @@ import { JwtGuard } from 'src/jwt/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { ErrorDto } from 'src/docs/swaggerDtos/error';
+import { ParseOptionalBoolPipe } from 'src/common/pipes/parse-optional-bool.pipe';
 import { UserWithoutPassword } from '../docs/swaggerDtos/user-without-password';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
@@ -56,7 +56,7 @@ export class UsersController {
   @Get()
   findAll(
     @Query() query: UsersQueryParams,
-    @Query('isActive', ParseBoolPipe) isActive: boolean,
+    @Query('isActive', ParseOptionalBoolPipe) isActive: boolean,
   ) {
     return this.userService.findAll({ ...query, isActive });
   }

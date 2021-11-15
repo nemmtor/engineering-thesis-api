@@ -54,7 +54,9 @@ export class UserService {
       where.name = query.name;
     }
 
-    where.isActive = query.isActive;
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
 
     return this.prismaService.user.findMany({
       select: userSelect,
