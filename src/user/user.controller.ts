@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Patch,
   Query,
   Req,
@@ -50,10 +51,14 @@ export class UsersController {
     description: 'Unuathorized',
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.MANAGER)
   @Get()
-  findAll(@Query() query: UsersQueryParams) {
-    return this.userService.findAll(query);
+  findAll(
+    @Query() query: UsersQueryParams,
+    @Query('isActive', ParseBoolPipe) isActive: boolean,
+  ) {
+    return this.userService.findAll({ ...query, isActive });
   }
 
   @ApiOperation({ summary: 'Get single user' })
@@ -73,7 +78,8 @@ export class UsersController {
     description: 'Unuathorized',
   })
   @ApiBearerAuth('Authorization')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.MANAGER)
   @Get(':id')
   findOne(@Param('id', UserByIdPipe) user: User) {
     return user;
@@ -174,7 +180,7 @@ export class UsersController {
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles( UserRole.MANAGER)
+  @Roles(UserRole.MANAGER)
   @Patch('change-role/:id')
   async changeRole(
     @Param('id') id: string,

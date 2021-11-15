@@ -12,4 +12,10 @@ export class UpdateUserDto {
   @IsString()
   @MinLength(3)
   name?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  avatarUrl?: string;
 }

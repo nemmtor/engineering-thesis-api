@@ -6,4 +6,5 @@ export type UserWithoutPassword = Omit<User, 'password'>;
 export type UsersQueryParams = {
   email?: string;
   name?: string;
+  isActive?: boolean;
 };

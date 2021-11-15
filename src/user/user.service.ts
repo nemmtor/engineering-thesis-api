@@ -54,6 +54,8 @@ export class UserService {
       where.name = query.name;
     }
 
+    where.isActive = query.isActive;
+
     return this.prismaService.user.findMany({
       select: userSelect,
       where,
@@ -87,11 +89,11 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, { email, name }: UpdateUserDto) {
+  async update(id: string, { email, name, avatarUrl }: UpdateUserDto) {
     try {
       const updatedUser = await this.prismaService.user.update({
         where: { id },
-        data: { email, name },
+        data: { email, name, avatarUrl },
         select: userSelect,
       });
 
