@@ -18,6 +18,7 @@ import {
 const userSelect: UserSelect = {
   avatarUrl: true,
   createdAt: true,
+  archivedAt: true,
   email: true,
   id: true,
   isActive: true,
@@ -110,9 +111,15 @@ export class UserService {
 
     checkRolePermission(requestingUserRole, user.role);
 
-    await this.prismaService.user.delete({
-      where: { id },
-    });
+    if (user.isActive) {
+      await this.prismaService.user.delete({
+        where: { id },
+      });
+    } else {
+      await this.prismaService.user.delete({
+        where: { id },
+      });
+    }
   }
 
   async changeRole(

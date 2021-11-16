@@ -12,6 +12,9 @@ export class UserWithoutPassword implements Omit<User, 'password'> {
   updatedAt: Date;
 
   @ApiProperty()
+  archivedAt: Date;
+
+  @ApiProperty()
   name: string;
 
   @ApiProperty()
