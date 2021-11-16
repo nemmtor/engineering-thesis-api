@@ -112,8 +112,11 @@ export class UserService {
     checkRolePermission(requestingUserRole, user.role);
 
     if (user.isActive) {
-      await this.prismaService.user.delete({
+      await this.prismaService.user.update({
         where: { id },
+        data: {
+          archivedAt: new Date(),
+        },
       });
     } else {
       await this.prismaService.user.delete({
