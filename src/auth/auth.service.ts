@@ -32,7 +32,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    if (!user.isActive) {
+    if (!user.isActive || !!user.archivedAt) {
       throw new UnauthorizedException();
     }
 

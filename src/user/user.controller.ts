@@ -57,8 +57,9 @@ export class UsersController {
   findAll(
     @Query() query: UsersQueryParams,
     @Query('isActive', ParseOptionalBoolPipe) isActive: boolean,
+    @Query('isArchived', ParseOptionalBoolPipe) isArchived: boolean,
   ) {
-    return this.userService.findAll({ ...query, isActive });
+    return this.userService.findAll({ ...query, isActive, isArchived });
   }
 
   @ApiOperation({ summary: 'Get single user' })

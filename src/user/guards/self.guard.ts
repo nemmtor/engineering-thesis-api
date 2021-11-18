@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
 import { RequestWithUser } from 'src/auth/auth.types';
 
 @Injectable()
@@ -10,7 +9,7 @@ export class SelfGuard implements CanActivate {
     const { id } = req.params;
 
     // TODO: can it be handled in more generic way?
-    if (req.user.role === UserRole.ADMIN) {
+    if (['ADMIN', 'MANAGER'].includes(req.user.role)) {
       return true;
     }
 

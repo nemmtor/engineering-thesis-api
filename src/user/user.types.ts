@@ -7,4 +7,5 @@ export type UsersQueryParams = {
   email?: string;
   name?: string;
   isActive?: boolean;
+  isArchived?: boolean;
 };

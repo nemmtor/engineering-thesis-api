@@ -59,6 +59,10 @@ export class UserService {
       where.isActive = query.isActive;
     }
 
+    if (typeof query.isArchived === 'boolean') {
+      where.archivedAt = query.isArchived ? { not: null } : { equals: null };
+    }
+
     return this.prismaService.user.findMany({
       select: userSelect,
       where,
