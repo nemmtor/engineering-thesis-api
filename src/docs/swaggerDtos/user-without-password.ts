@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Users } from '@prisma/client';
 
-export class UserWithoutPassword implements Omit<Users, 'password'> {
+export class UserWithRole implements Omit<Users, 'password'> {
   @ApiProperty()
   id: string;
 
@@ -25,6 +25,11 @@ export class UserWithoutPassword implements Omit<Users, 'password'> {
 
   @ApiProperty()
   roleId: number;
+
+  @ApiProperty()
+  role: {
+    role: string;
+  };
 
   @ApiPropertyOptional({})
   avatarUrl: string;

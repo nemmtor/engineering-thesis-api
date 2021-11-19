@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { UserLoginRequest } from 'src/docs/swaggerDtos/user-login-request';
 import { UserLoginResponse } from 'src/docs/swaggerDtos/user-login-response';
-import { UserWithoutPassword } from 'src/docs/swaggerDtos/user-without-password';
+import { UserWithRole } from 'src/docs/swaggerDtos/user-without-password';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { ErrorDto } from 'src/docs/swaggerDtos/error';
@@ -41,7 +41,7 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
     description: 'Success',
-    type: UserWithoutPassword,
+    type: UserWithRole,
     status: 201,
   })
   @ApiResponse({
@@ -137,7 +137,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current logged user' })
   @ApiResponse({
     description: 'Success',
-    type: UserWithoutPassword,
+    type: UserWithRole,
     status: 200,
   })
   @ApiResponse({

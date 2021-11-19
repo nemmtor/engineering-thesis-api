@@ -25,7 +25,7 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { ErrorDto } from 'src/docs/swaggerDtos/error';
 import { ParseOptionalBoolPipe } from 'src/common/pipes/parse-optional-bool.pipe';
-import { UserWithoutPassword } from '../docs/swaggerDtos/user-without-password';
+import { UserWithRole } from '../docs/swaggerDtos/user-without-password';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
 import { SelfGuard } from './guards/self.guard';
@@ -41,7 +41,7 @@ export class UsersController {
   @ApiQuery({ name: 'name', type: 'string', required: false })
   @ApiQuery({ name: 'email', type: 'string', required: false })
   @ApiResponse({
-    type: [UserWithoutPassword],
+    type: [UserWithRole],
     status: 200,
     description: 'Success',
   })
@@ -68,7 +68,7 @@ export class UsersController {
     type: 'string',
   })
   @ApiResponse({
-    type: UserWithoutPassword,
+    type: UserWithRole,
     status: 200,
     description: 'Success',
   })
@@ -88,7 +88,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({
-    type: [UserWithoutPassword],
+    type: [UserWithRole],
     status: 200,
     description: 'Success',
   })
