@@ -9,7 +9,7 @@ export class SelfGuard implements CanActivate {
     const { id } = req.params;
 
     // TODO: can it be handled in more generic way?
-    if (['ADMIN', 'MANAGER'].includes(req.user.role)) {
+    if (['ADMIN', 'MANAGER'].includes(req.user.role.role)) {
       return true;
     }
 

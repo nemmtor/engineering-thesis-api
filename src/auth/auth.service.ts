@@ -3,7 +3,7 @@ import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from 'src/jwt/jwt.service';
-import { User } from '@prisma/client';
+import { Users } from '@prisma/client';
 import { UserWithoutPassword } from 'src/user/user.types';
 import { UserJwtPayload } from 'src/jwt/jwt.types';
 
@@ -18,11 +18,12 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserWithoutPassword> {
-    let user: User;
+    let user: Users;
 
     try {
       user = await this.userService.findOneByEmailWithPassword(email);
     } catch (e) {
+      console.log(e);
       throw new UnauthorizedException();
     }
 

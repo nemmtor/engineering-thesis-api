@@ -3,19 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, User, UserRole } from '@prisma/client';
+import { Prisma, Users, UserRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
 import { checkRolePermission } from './helpers/check-role-permission';
+import { mapUserRoleToLevel } from './helpers/map-user-role-to-level';
 import {
-  UserSelect,
   UsersQueryParams,
   UserWithoutPassword,
+  UserWithRole,
 } from './user.types';
 
-const userSelect: UserSelect = {
+const userSelect = {
   avatarUrl: true,
   createdAt: true,
   archivedAt: true,
@@ -23,8 +24,17 @@ const userSelect: UserSelect = {
   id: true,
   isActive: true,
   name: true,
-  role: true,
   updatedAt: true,
+  roleId: true,
+};
+
+const userSelectWithRole = {
+  ...userSelect,
+  role: {
+    select: {
+      role: true,
+    },
+  },
 };
 
 @Injectable()
@@ -33,9 +43,9 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<UserWithoutPassword> {
     try {
-      const user = await this.prismaService.user.create({
-        data: createUserDto,
-        select: userSelect,
+      const user = await this.prismaService.users.create({
+        data: { ...createUserDto, role: { connect: { id: 1 } } },
+        select: userSelectWithRole,
       });
 
       return user;
@@ -45,7 +55,7 @@ export class UserService {
   }
 
   findAll(query: UsersQueryParams) {
-    const where: Prisma.UserWhereInput = {};
+    const where: Prisma.UsersWhereInput = {};
 
     if (query.email) {
       where.email = query.email;
@@ -63,16 +73,16 @@ export class UserService {
       where.archivedAt = query.isArchived ? { not: null } : { equals: null };
     }
 
-    return this.prismaService.user.findMany({
-      select: userSelect,
+    return this.prismaService.users.findMany({
+      select: userSelectWithRole,
       where,
     });
   }
 
-  async findOne(id: string): Promise<UserWithoutPassword> {
-    const user = await this.prismaService.user.findUnique({
+  async findOne(id: string): Promise<UserWithRole> {
+    const user = await this.prismaService.users.findUnique({
       where: { id },
-      select: userSelect,
+      select: userSelectWithRole,
     });
 
     if (!user) {
@@ -83,10 +93,10 @@ export class UserService {
   }
 
   // Only for login purposes
-  async findOneByEmailWithPassword(email: string): Promise<User> {
-    const user = await this.prismaService.user.findUnique({
+  async findOneByEmailWithPassword(email: string): Promise<Users> {
+    const user = await this.prismaService.users.findUnique({
       where: { email },
-      select: { ...userSelect, password: true },
+      select: { ...userSelectWithRole, password: true },
     });
 
     if (!user) {
@@ -98,10 +108,10 @@ export class UserService {
 
   async update(id: string, { email, name, avatarUrl }: UpdateUserDto) {
     try {
-      const updatedUser = await this.prismaService.user.update({
+      const updatedUser = await this.prismaService.users.update({
         where: { id },
         data: { email, name, avatarUrl },
-        select: userSelect,
+        select: userSelectWithRole,
       });
 
       return updatedUser;
@@ -113,17 +123,17 @@ export class UserService {
   async remove(id: string, requestingUserRole: UserRole) {
     const user = await this.findOne(id);
 
-    checkRolePermission(requestingUserRole, user.role);
+    checkRolePermission(requestingUserRole, user.role.role);
 
     if (user.isActive) {
-      await this.prismaService.user.update({
+      await this.prismaService.users.update({
         where: { id },
         data: {
           archivedAt: new Date(),
         },
       });
     } else {
-      await this.prismaService.user.delete({
+      await this.prismaService.users.delete({
         where: { id },
       });
     }
@@ -136,21 +146,22 @@ export class UserService {
   ) {
     const user = await this.findOne(id);
 
-    checkRolePermission(requestingUserRole, user.role);
-
-    return this.prismaService.user.update({
+    checkRolePermission(requestingUserRole, user.role.role);
+    return this.prismaService.users.update({
       where: { id },
-      data: { role: promoteUserDto.role },
-      select: userSelect,
+      data: {
+        role: { connect: { id: mapUserRoleToLevel[promoteUserDto.role] } },
+      },
+      select: userSelectWithRole,
     });
   }
 
   async activate(id: string) {
     try {
-      await this.prismaService.user.update({
+      await this.prismaService.users.update({
         where: { id },
         data: { isActive: true },
-        select: userSelect,
+        select: userSelectWithRole,
       });
     } catch (e) {
       throw new NotFoundException('User not found');
