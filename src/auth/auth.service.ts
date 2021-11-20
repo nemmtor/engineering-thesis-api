@@ -23,7 +23,6 @@ export class AuthService {
     try {
       user = await this.userService.findOneByEmailWithPassword(email);
     } catch (e) {
-      console.log(e);
       throw new UnauthorizedException();
     }
 

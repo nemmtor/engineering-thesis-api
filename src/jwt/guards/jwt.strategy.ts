@@ -12,11 +12,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: (req: Request) => {
         if (!req) return null;
 
+        console.log('req.cookies:', req.cookies);
+        console.log('req.cookies.accessToken:', req.cookies.accessToken);
         if (req.cookies && req.cookies.accessToken) {
           return req.cookies.accessToken;
         }
 
         // TODO: Remove this to migrate to cookies
+        console.log('req.headers:', req.headers.authorization);
+
+        console.log('req.body:', req.body);
         return req.headers.authorization;
       },
       ignoreExpiration: false,
