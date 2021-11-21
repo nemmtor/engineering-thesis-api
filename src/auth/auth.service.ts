@@ -7,8 +7,8 @@ import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from 'src/jwt/jwt.service';
-import { UserRole, Users } from '@prisma/client';
-import { UserWithoutPassword } from 'src/user/user.types';
+import { Users } from '@prisma/client';
+import { UserWithoutPassword, UserWithRole } from 'src/user/user.types';
 import { UserJwtPayload } from 'src/jwt/jwt.types';
 import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
 
@@ -66,19 +66,19 @@ export class AuthService {
   async changeUserPassword(
     userId: string,
     changePasswordDto: ChangePasswordDto,
-    requestingUserRole: UserRole,
+    requestingUser: UserWithRole,
   ) {
     if (changePasswordDto.newPassword !== changePasswordDto.newPasswordRepeat) {
       throw new BadRequestException();
     }
 
-    const user = await this.userService.findOneByIdWithPassword(userId);
-
     const omitPasswordCheck =
-      ['ADMIN', 'MANAGER'].includes(requestingUserRole) && user.id !== userId;
+      ['ADMIN', 'MANAGER'].includes(requestingUser.role.role) &&
+      userId !== requestingUser.id;
 
     if (!omitPasswordCheck) {
       if (!changePasswordDto.oldPassword) throw new Error();
+      const user = await this.userService.findOneByIdWithPassword(userId);
 
       const passwordsMatch = await bcrypt.compare(
         changePasswordDto.oldPassword,
