@@ -106,11 +106,28 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, { email, name, avatarUrl }: UpdateUserDto) {
+  // Only for change-password purposes
+  async findOneByIdWithPassword(id: string): Promise<Users> {
+    const user = await this.prismaService.users.findUnique({
+      where: { id },
+      select: { ...userSelectWithRole, password: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async update(
+    id: string,
+    { email, name, avatarUrl, password }: UpdateUserDto & { password?: string },
+  ) {
     try {
       const updatedUser = await this.prismaService.users.update({
         where: { id },
-        data: { email, name, avatarUrl },
+        data: { email, name, avatarUrl, password },
         select: userSelectWithRole,
       });
 

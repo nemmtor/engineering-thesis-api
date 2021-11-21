@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -24,6 +25,8 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserRole } from '@prisma/client';
 import { Roles } from 'src/common/guards/roles/roles.decorator';
 import { Response } from 'express';
+import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
+import { SelfGuard } from 'src/user/guards/self.guard';
 import { AuthService } from './auth.service';
 import { RequestWithUser, RequestWithUserId } from './auth.types';
 import { JwtGuard } from '../jwt/guards/jwt.guard';
@@ -150,5 +153,38 @@ export class AuthController {
   @Get('me')
   async getMe(@Req() req: RequestWithUser) {
     return this.userService.findOne(req.user.id);
+  }
+
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({
+    description: 'Password changed',
+    status: 201,
+  })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Bad request',
+    type: ErrorDto,
+    status: 400,
+  })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(JwtGuard, SelfGuard)
+  @Post('change-password/:id')
+  async changePassword(
+    @Req() req: RequestWithUser,
+    @Param('id') userId: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const omitPasswordCheck = ['ADMIN', 'MANAGER'].includes(req.user.role.role);
+
+    return this.authService.changeUserPassword(
+      userId,
+      changePasswordDto,
+      omitPasswordCheck,
+    );
   }
 }
