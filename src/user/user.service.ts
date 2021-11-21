@@ -120,18 +120,27 @@ export class UserService {
     return user;
   }
 
-  async update(
-    id: string,
-    { email, name, avatarUrl, password }: UpdateUserDto & { password?: string },
-  ) {
+  async update(id: string, { email, name, avatarUrl }: UpdateUserDto) {
     try {
       const updatedUser = await this.prismaService.users.update({
         where: { id },
-        data: { email, name, avatarUrl, password },
+        data: { email, name, avatarUrl },
         select: userSelectWithRole,
       });
 
       return updatedUser;
+    } catch (e) {
+      throw new ConflictException(e);
+    }
+  }
+
+  async changePassword(id: string, password: string) {
+    try {
+      await this.prismaService.users.update({
+        where: { id },
+        data: { password },
+        select: userSelectWithRole,
+      });
     } catch (e) {
       throw new ConflictException(e);
     }

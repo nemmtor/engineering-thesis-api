@@ -179,12 +179,10 @@ export class AuthController {
     @Param('id') userId: string,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    const omitPasswordCheck = ['ADMIN', 'MANAGER'].includes(req.user.role.role);
-
     return this.authService.changeUserPassword(
       userId,
       changePasswordDto,
-      omitPasswordCheck,
+      req.user.role.role,
     );
   }
 }
