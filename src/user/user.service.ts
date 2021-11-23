@@ -55,7 +55,13 @@ export class UserService {
   }
 
   findAll(query: UsersQueryParams) {
-    const where: Prisma.UsersWhereInput = {};
+    const where: Prisma.UsersWhereInput = {
+      role: {
+        role: {
+          notIn: 'ADMIN',
+        },
+      },
+    };
 
     if (query.email) {
       where.email = query.email;
