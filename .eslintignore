@@ -3,3 +3,4 @@ db
 **/*.d.ts
 *.json
 **/migrations/*
+seed.ts

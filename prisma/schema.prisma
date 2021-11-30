@@ -19,24 +19,135 @@ enum UserRole {
   USER
 }
 
-model Users {
+model User {
   id         String    @id @default(cuid())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  archivedAt DateTime?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  archivedAt DateTime? @map("archived_at")
 
   name      String
   email     String  @unique
   password  String
-  avatarUrl String?
-  isActive  Boolean @default(false)
+  avatarUrl String? @map("avatar_url")
+  isActive  Boolean @default(false) @map("is_active")
 
-  role   UserRoles @relation(fields: [roleId], references: [id])
-  roleId Int
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId Int  @default(1) @map("role_id")
+
+  sale Sale[]
+
+  @@map("user")
 }
 
-model UserRoles {
+model Role {
   id   Int      @id @default(autoincrement())
-  role UserRole
-  User Users[]
+  name UserRole
+  User User[]
+
+
+  @@map("role")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name           String
+  email          String @unique
+  companyName    String @map("company_name")
+  taxNumber      String @map("tax_nunber")
+  activityType   String @map("activity_type")
+  companyAddress String @map("company_address")
+
+  lawyer   Lawyer? @relation(fields: [lawyerId], references: [id])
+  lawyerId String? @map("lawyer_id")
+
+
+  Sale Sale[]
+
+  @@map("customer")
+}
+
+model Lawyer {
+  id       String     @id @default(cuid())
+  name     String
+  customer Customer[]
+
+  @@map("lawyer")
+}
+
+model Contract {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  signedAt      DateTime @updatedAt @map("signed_at")
+  plannedSignAt DateTime @updatedAt @map("planned_signed_at")
+  price         Int
+  length        Int
+  signAddress   String   @map("sign_address")
+
+  sale Sale?
+
+  @@map("contract")
+}
+
+enum ItemType {
+  RED_STAMP
+  GREEN_STAMP
+  CERTIFICATE
+}
+
+model SaleItem {
+  id   Int      @id @default(autoincrement())
+  type ItemType
+
+  sale Sale?
+
+  @@map("saleitem")
+}
+
+enum StatusType {
+  BEFORE_QA
+  QA_REJECTED
+  DEBT_REJECTED
+  QA_ACCEPTED
+  SALE_CONFIRMED
+  SIGN_REJECTED
+  SIGN_ACCEPTED
+  ASSIGNED
+}
+
+model SaleStatus {
+  id        String     @id @default(cuid())
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  type      StatusType
+  message   String?
+
+  sale Sale?
+
+  @@map("salestatus")
+}
+
+model Sale {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String @map("customer_id")
+
+  contract Contract @relation(fields: [contractId], references: [id])
+  contractId String @unique @map("contract_id")
+
+  item SaleItem @relation(fields: [itemId], references: [id])
+  itemId Int @unique @map("item_id")
+
+  status SaleStatus @relation(fields: [statusId], references: [id])
+  statusId String @unique @map("status_id")
+
+  others String?
+
+  @@map("sale")
 }

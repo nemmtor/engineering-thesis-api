@@ -5,10 +5,15 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
     "prisma:migration-run": "prisma migrate deploy",
+    "prisma:reset": "prisma migrate reset",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "sentry:upload-sourcemaps": "sentry-cli releases files <RELEASENAME> upload-sourcemaps ./dist --url-prefix '~/'",
@@ -21,7 +26,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed": "ts-node ./prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/cli": "^8.0.0",

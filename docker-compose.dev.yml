@@ -15,14 +15,14 @@ services:
       - .env
     volumes:
       - ./:/api
-      - /api/node_modules/
+      - exclude:/api/node_modules/
 
   postgres:
     image: postgres:13
     container_name: postgres-dev
     restart: always
     ports:
-      - 5432:5432
+      - 5433:5432
     env_file:
       - .env
     volumes:
@@ -45,4 +45,5 @@ volumes:
     name: saleshelper-db-volume-dev
   pgadmin-dev:
     name: saleshelper-pgadmin-volume-dev
+  exclude:
   

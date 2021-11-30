@@ -1,10 +1,10 @@
-import { UserRole, Users } from '@prisma/client';
+import { UserRole, User } from '@prisma/client';
 
-export type UserSelect = Record<keyof Omit<Users, 'password'>, boolean>;
+export type UserSelect = Record<keyof Omit<User, 'password'>, boolean>;
 
-export type UserWithoutPassword = Omit<Users, 'password'>;
+export type UserWithoutPassword = Omit<User, 'password'>;
 
-export type UserWithRole = UserWithoutPassword & { role: { role: UserRole } };
+export type UserWithRole = UserWithoutPassword & { role: { name: UserRole } };
 
 export type UsersQueryParams = {
   email?: string;

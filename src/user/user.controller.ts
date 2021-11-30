@@ -17,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Users, UserRole } from '@prisma/client';
+import { User, UserRole } from '@prisma/client';
 import { RequestWithUser } from 'src/auth/auth.types';
 import { Roles } from 'src/common/guards/roles/roles.decorator';
 import { JwtGuard } from 'src/jwt/guards/jwt.guard';
@@ -82,7 +82,7 @@ export class UsersController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
   @Get(':id')
-  findOne(@Param('id', UserByIdPipe) user: Users) {
+  findOne(@Param('id', UserByIdPipe) user: User) {
     return user;
   }
 
@@ -138,7 +138,7 @@ export class UsersController {
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     // TODO: checkRolePermissions here ? maybe as a guard
-    await this.userService.remove(id, req.user.role.role);
+    await this.userService.remove(id, req.user.role.name);
   }
 
   @ApiOperation({ summary: 'Activate user' })
@@ -189,6 +189,6 @@ export class UsersController {
     @Req() req: RequestWithUser,
   ) {
     // TODO: checkRolePermissions here ? maybe as a guard
-    return this.userService.changeRole(id, promoteUserDto, req.user.role.role);
+    return this.userService.changeRole(id, promoteUserDto, req.user.role.name);
   }
 }

@@ -7,7 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from 'src/jwt/jwt.service';
-import { Users } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UserWithoutPassword, UserWithRole } from 'src/user/user.types';
 import { UserJwtPayload } from 'src/jwt/jwt.types';
 import { ChangePasswordDto } from 'src/user/dto/change-password.dto';
@@ -23,7 +23,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserWithoutPassword> {
-    let user: Users;
+    let user: User;
 
     try {
       user = await this.userService.findOneByEmailWithPassword(email);
@@ -73,7 +73,7 @@ export class AuthService {
     }
 
     const omitPasswordCheck =
-      ['ADMIN', 'MANAGER'].includes(requestingUser.role.role) &&
+      ['ADMIN', 'MANAGER'].includes(requestingUser.role.name) &&
       userId !== requestingUser.id;
 
     if (!omitPasswordCheck) {
