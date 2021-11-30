@@ -4,7 +4,7 @@ WORKDIR /api
 
 COPY package*.json ./
 
-COPY prisma ./prisma/
+COPY prisma ./prisma
 
 RUN npm install --production
 
@@ -14,11 +14,14 @@ RUN npm run build
 
 FROM node:14.18-alpine AS production
 
+
+WORKDIR /api
+
 COPY --from=builder /api/node_modules ./node_modules
 COPY --from=builder /api/package*.json ./
 COPY --from=builder /api/scripts/start.prod.sh ./
 COPY --from=builder /api/dist ./dist
-COPY --from=builder /api/prisma ./
+COPY --from=builder /api/prisma ./prisma
 
 
 EXPOSE 3000
