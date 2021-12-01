@@ -81,8 +81,10 @@ model Contract {
   id            String   @id @default(cuid())
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
-  signedAt      DateTime @updatedAt @map("signed_at")
+
+  signedAt      DateTime? @updatedAt @map("signed_at")
   plannedSignAt DateTime @updatedAt @map("planned_signed_at")
+
   price         Int
   length        Int
   signAddress   String   @map("sign_address")
