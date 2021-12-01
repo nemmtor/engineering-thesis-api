@@ -8,7 +8,8 @@ datasource db {
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-arm-openssl-1.1.x", "linux-musl"]
+  engineType = "binary"
+  // binaryTargets = ["native", "linux-arm-openssl-1.1.x", "linux-musl"]
 }
 
 enum UserRole {
@@ -54,11 +55,12 @@ model Customer {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   name           String
-  email          String @unique
   companyName    String @map("company_name")
   taxNumber      String @map("tax_nunber")
   activityType   String @map("activity_type")
   companyAddress String @map("company_address")
+
+  email String? @unique
 
   lawyer   Lawyer? @relation(fields: [lawyerId], references: [id])
   lawyerId String? @map("lawyer_id")
@@ -78,16 +80,16 @@ model Lawyer {
 }
 
 model Contract {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  signedAt      DateTime? @updatedAt @map("signed_at")
   plannedSignAt DateTime @updatedAt @map("planned_signed_at")
-
   price         Int
   length        Int
   signAddress   String   @map("sign_address")
+
+  signedAt DateTime? @updatedAt @map("signed_at")
 
   sale Sale?
 
@@ -101,9 +103,9 @@ enum ItemType {
 }
 
 model SaleItem {
-  id   Int      @id @default(autoincrement())
-  type ItemType
-  isAvailable Boolean @map("is_available") @default(true)
+  id          Int      @id @default(autoincrement())
+  type        ItemType
+  isAvailable Boolean  @default(true) @map("is_available")
 
   sale Sale?
 
@@ -125,6 +127,7 @@ model SaleStatus {
   id        String     @id @default(cuid())
   updatedAt DateTime   @updatedAt @map("updated_at")
   type      StatusType
+
   message   String?
 
   sale Sale?
@@ -139,16 +142,16 @@ model Sale {
   userId String @map("user_id")
 
   customer   Customer @relation(fields: [customerId], references: [id])
-  customerId String @map("customer_id")
+  customerId String   @map("customer_id")
 
-  contract Contract @relation(fields: [contractId], references: [id])
-  contractId String @unique @map("contract_id")
+  contract   Contract @relation(fields: [contractId], references: [id])
+  contractId String   @unique @map("contract_id")
 
-  item SaleItem @relation(fields: [itemId], references: [id])
-  itemId Int @unique @map("item_id")
+  item   SaleItem @relation(fields: [itemId], references: [id])
+  itemId Int      @unique @map("item_id")
 
-  status SaleStatus @relation(fields: [statusId], references: [id])
-  statusId String @unique @map("status_id")
+  status   SaleStatus @relation(fields: [statusId], references: [id])
+  statusId String     @unique @map("status_id")
 
   others String?
 

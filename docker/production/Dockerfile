@@ -1,4 +1,4 @@
-FROM node:16.13-alpine AS builder
+FROM node:16.13 AS builder
 
 WORKDIR /api
 
@@ -6,13 +6,19 @@ COPY package*.json ./
 
 COPY prisma ./prisma
 
+# RUN apk update
+
+# RUN apk add --update alpine-sdk
+
+# RUN apk add --update python3
+
 RUN npm ci
 
 COPY . .
 
 RUN npm run build
 
-FROM node:16.13-alpine AS production
+FROM node:16.13 AS production
 
 
 WORKDIR /api
