@@ -7,6 +7,7 @@ import { PerformanceInterceptor } from './common/interceptors/performance-interc
 import { JwtModule } from './jwt/jwt.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
+import { SaleModule } from './sale/sale.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UserModule } from './user/user.module';
     ConfigModule.forRoot(),
     AuthModule,
     JwtModule,
+    SaleModule,
   ],
   providers: [
     {

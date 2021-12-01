@@ -34,6 +34,9 @@ jobs:
             - ~/workspace/node_modules
           key: npm-dependencies-{{ checksum "package-lock.json" }}
       - run:
+          name: Build prisma types
+          command: npm run prisma:generate
+      - run:
           name: Build project
           command: npm run build
       - persist_to_workspace:

@@ -132,7 +132,6 @@ export class UsersController {
     status: 404,
     description: 'User not found',
   })
-  @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
   @Delete(':id')
