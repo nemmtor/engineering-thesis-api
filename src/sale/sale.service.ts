@@ -13,7 +13,7 @@ export class SaleService {
         data: {
           item: { connect: { id: createSaleDto.itemId } },
           user: { connect: { id: userId } },
-          customer: { create: { ...createSaleDto.customer } },
+          customer: { create: createSaleDto.customer },
           contract: { create: createSaleDto.contract },
           status: { create: { type: StatusType.BEFORE_QA } },
           others: createSaleDto.others,

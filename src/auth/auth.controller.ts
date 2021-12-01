@@ -15,12 +15,12 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserLoginRequest } from 'src/docs/swaggerDtos/user-login-request';
-import { UserLoginResponse } from 'src/docs/swaggerDtos/user-login-response';
-import { UserWithRole } from 'src/docs/swaggerDtos/user-without-password';
+import { UserLoginRequest } from 'src/docs/swaggerTypes/user-login-request';
+import { UserLoginResponse } from 'src/docs/swaggerTypes/user-login-response';
+import { UserWithRole } from 'src/docs/swaggerTypes/user-without-password';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
-import { ErrorDto } from 'src/docs/swaggerDtos/error';
+import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserRole } from '@prisma/client';
 import { Roles } from 'src/common/guards/roles/roles.decorator';
@@ -53,7 +53,7 @@ export class AuthController {
     type: ErrorDto,
   })
   @ApiResponse({
-    description: 'Email is already taken',
+    description: 'Error in database layer',
     status: 409,
     type: ErrorDto,
   })

@@ -7,7 +7,7 @@ datasource db {
 }
 
 generator client {
-  provider      = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "binary"
   // binaryTargets = ["native", "linux-arm-openssl-1.1.x", "linux-musl"]
 }
@@ -107,7 +107,7 @@ model SaleItem {
   type        ItemType
   isAvailable Boolean  @default(true) @map("is_available")
 
-  sale Sale?
+  sale Sale[]
 
   @@map("saleitem")
 }
@@ -128,7 +128,7 @@ model SaleStatus {
   updatedAt DateTime   @updatedAt @map("updated_at")
   type      StatusType
 
-  message   String?
+  message String?
 
   sale Sale?
 
@@ -147,8 +147,8 @@ model Sale {
   contract   Contract @relation(fields: [contractId], references: [id])
   contractId String   @unique @map("contract_id")
 
-  item   SaleItem @relation(fields: [itemId], references: [id])
-  itemId Int      @unique @map("item_id")
+  item   SaleItem? @relation(fields: [itemId], references: [id])
+  itemId Int? @map("item_id")
 
   status   SaleStatus @relation(fields: [statusId], references: [id])
   statusId String     @unique @map("status_id")

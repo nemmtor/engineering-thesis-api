@@ -17,5 +17,5 @@ export const parsePrismaError = (error: PrismaError) => {
   }
 
   Sentry.captureException(`Unhandled prisma error: ${error}`);
-  return ['Unhandled prisma error'];
+  return [`Unhandled prisma error: ${JSON.stringify(error)}`];
 };
