@@ -25,10 +25,9 @@ jobs:
       - restore_cache:
           keys:
             - npm-dependencies-{{ checksum "package-lock.json" }}
-            - npm-dependencies-
       - run:
           name: Install dependencies
-          command: npm install
+          command: npm ci
       - save_cache:
           paths:
             - ~/workspace/node_modules
