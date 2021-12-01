@@ -8,6 +8,12 @@ export class Sale implements PrismaSale {
   @ApiProperty({ example: '87efdb49-f294-44a9-a1b0-3c57afbd5e32' })
   userId: string;
 
+  @ApiProperty({ example: null })
+  qaId: string | null;
+
+  @ApiProperty({ example: null })
+  repId: string | null;
+
   @ApiProperty({ example: '889ad0a9-86f1-4c3a-a75a-e4e1857e1093' })
   customerId: string;
 
