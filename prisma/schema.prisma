@@ -101,6 +101,7 @@ enum ItemType {
 model SaleItem {
   id   Int      @id @default(autoincrement())
   type ItemType
+  isAvailable Boolean @map("is_available") @default(true)
 
   sale Sale?
 

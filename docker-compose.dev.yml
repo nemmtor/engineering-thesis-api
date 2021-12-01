@@ -22,11 +22,12 @@ services:
     container_name: postgres-dev
     restart: always
     ports:
-      - 5433:5432
+      - 5433:5433
     env_file:
       - .env
     volumes:
       - postgres-dev:/var/lib/postgresql/data
+    command: -p 5433
   
   pgadmin:
     container_name: pgadmin-dev
