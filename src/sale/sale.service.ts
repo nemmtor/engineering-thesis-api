@@ -1,11 +1,90 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { StatusType } from '.prisma/client';
+import { UserWithRole } from 'src/user/user.types';
+import { Prisma, StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
+
+const isValidStatus = (status: any): status is StatusType => {
+  if (Object.keys(StatusType).includes(status)) {
+    return true;
+  }
+  return false;
+};
+
+// TODO: it should be in pipe
+const isArrayOfValidStatuses = (statuses: any): statuses is StatusType[] => {
+  if (!Array.isArray(statuses)) return false;
+
+  if (!statuses.every(isValidStatus)) return false;
+
+  return true;
+};
 
 @Injectable()
 export class SaleService {
   constructor(private prismaService: PrismaService) {}
+
+  async getUnassignedSales(user: UserWithRole) {
+    const where: Prisma.SaleWhereInput = {};
+
+    if (
+      user.role.name === UserRole.ADMIN ||
+      user.role.name === UserRole.MANAGER
+    ) {
+      where.AND = {
+        status: { is: { type: { in: ['BEFORE_QA', 'SALE_CONFIRMED'] } } },
+      };
+
+      where.OR = [{ qaId: { equals: null } }, { repId: { equals: null } }];
+    }
+
+    if (user.role.name === UserRole.SALES_REPRESENTATIVE) {
+      where.AND = {
+        status: { is: { type: { equals: 'SALE_CONFIRMED' } } },
+      };
+
+      where.OR = [{ repId: { equals: null } }];
+    }
+
+    if (user.role.name === UserRole.QUALITY_CONTROLLER) {
+      where.AND = {
+        status: { is: { type: { equals: 'BEFORE_QA' } } },
+      };
+
+      where.OR = [{ qaId: { equals: null } }];
+    }
+
+    try {
+      const sales = await this.prismaService.sale.findMany({ where });
+
+      return sales;
+    } catch (error) {
+      throw new ConflictException(error);
+    }
+  }
+
+  async findSales(statuses: StatusType[], userId: string) {
+    if (!!statuses && !isArrayOfValidStatuses(statuses)) {
+      throw new BadRequestException();
+    }
+
+    try {
+      const sales = await this.prismaService.sale.findMany({
+        where: {
+          OR: [{ userId }, { qaId: userId }, { repId: userId }],
+          AND: { status: { is: { type: { in: statuses } } } },
+        },
+      });
+
+      return sales;
+    } catch (error) {
+      throw new ConflictException(error);
+    }
+  }
 
   async createSale(createSaleDto: CreateSaleDto, userId: string) {
     try {
@@ -40,7 +119,6 @@ export class SaleService {
         );
       }
       const results = await this.prismaService.$transaction(queries);
-      console.log(results);
 
       const sale = results[results.length - 1];
 

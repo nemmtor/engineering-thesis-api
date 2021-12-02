@@ -6,7 +6,6 @@ services:
       dockerfile: docker/dev/Dockerfile
     container_name: nest-api-dev
     command: sh scripts/start.dev.sh
-    restart: always
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     depends_on:
@@ -20,7 +19,6 @@ services:
   postgres:
     image: postgres:13
     container_name: postgres-dev
-    restart: always
     ports:
       - 5433:5433
     env_file:

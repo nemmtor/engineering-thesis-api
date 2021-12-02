@@ -40,6 +40,13 @@ export class UsersController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiQuery({ name: 'name', type: 'string', required: false })
   @ApiQuery({ name: 'email', type: 'string', required: false })
+  @ApiQuery({
+    name: 'isActive',
+    type: 'boolean',
+    required: false,
+    example: true,
+  })
+  @ApiQuery({ name: 'isArchived', type: 'boolean', required: false })
   @ApiResponse({
     type: [UserWithRole],
     status: 200,
@@ -56,8 +63,8 @@ export class UsersController {
   @Get()
   findAll(
     @Query() query: UsersQueryParams,
-    @Query('isActive', ParseOptionalBoolPipe) isActive: boolean,
-    @Query('isArchived', ParseOptionalBoolPipe) isArchived: boolean,
+    @Query('isActive', ParseOptionalBoolPipe) isActive?: boolean,
+    @Query('isArchived', ParseOptionalBoolPipe) isArchived?: boolean,
   ) {
     return this.userService.findAll({ ...query, isActive, isArchived });
   }

@@ -1,9 +1,20 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/auth/auth.types';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { Sale } from 'src/docs/swaggerTypes/sale';
 import { JwtGuard } from 'src/jwt/guards/jwt.guard';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
+import { Roles } from 'src/common/guards/roles/roles.decorator';
+import { StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { SaleService } from './sale.service';
 
@@ -35,5 +46,58 @@ export class SaleController {
     @Body() createSaleDto: CreateSaleDto,
   ) {
     return this.saleService.createSale(createSaleDto, req.user.id);
+  }
+
+  @ApiOperation({ summary: 'Get sales' })
+  @ApiQuery({ name: 'statuses[]', required: false })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: [Sale],
+  })
+  @UseGuards(JwtGuard)
+  @Get()
+  async getSales(
+    @Req() req: RequestWithUser,
+    @Query() query: { statuses: StatusType[] },
+  ) {
+    return this.saleService.findSales(query.statuses, req.user.id);
+  }
+
+  @ApiOperation({ summary: 'Get unassigned sales' })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: [Sale],
+  })
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(
+    UserRole.MANAGER,
+    UserRole.SALES_REPRESENTATIVE,
+    UserRole.QUALITY_CONTROLLER,
+  )
+  @Get('/unassigned')
+  async getUnassignedSales(@Req() req: RequestWithUser) {
+    return this.saleService.getUnassignedSales(req.user);
   }
 }
