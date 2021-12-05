@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserWithRole } from './user-without-password';
+import { UserWithRole } from './user-with-role';
 
 export class UserLoginResponse {
   @ApiProperty()

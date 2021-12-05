@@ -25,7 +25,7 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { ParseOptionalBoolPipe } from 'src/common/pipes/parse-optional-bool.pipe';
-import { UserWithRole } from '../docs/swaggerTypes/user-without-password';
+import { UserWithRole } from '../docs/swaggerTypes/user-with-role';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
 import { SelfGuard } from './guards/self.guard';

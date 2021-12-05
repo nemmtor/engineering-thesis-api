@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { UserLoginRequest } from 'src/docs/swaggerTypes/user-login-request';
 import { UserLoginResponse } from 'src/docs/swaggerTypes/user-login-response';
-import { UserWithRole } from 'src/docs/swaggerTypes/user-without-password';
+import { UserWithRole } from 'src/docs/swaggerTypes/user-with-role';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';

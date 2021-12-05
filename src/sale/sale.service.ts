@@ -74,6 +74,17 @@ export class SaleService {
 
     try {
       const sales = await this.prismaService.sale.findMany({
+        select: {
+          id: true,
+          contract: true,
+          customer: true,
+          item: true,
+          qa: true,
+          user: true,
+          rep: true,
+          status: true,
+          others: true,
+        },
         where: {
           OR: [{ userId }, { qaId: userId }, { repId: userId }],
           AND: { status: { is: { type: { in: statuses } } } },

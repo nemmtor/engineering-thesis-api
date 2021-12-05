@@ -10,7 +10,7 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/auth/auth.types';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
-import { Sale } from 'src/docs/swaggerTypes/sale';
+import { Sale } from 'src/docs/swaggerTypes/sale-response';
 import { JwtGuard } from 'src/jwt/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/guards/roles/roles.decorator';
