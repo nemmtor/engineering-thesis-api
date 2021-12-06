@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Customer, Sale as PrismaSale } from '.prisma/client';
+import { Sale as PrismaSale } from '.prisma/client';
 import { UserWithRole } from './user-with-role';
+import { Customer } from './customer';
+import { Contract } from './contract';
+import { Item } from './items';
+import { Status } from './status';
 
 export class Sale implements Partial<PrismaSale> {
   @ApiProperty({ example: '7f8162b2-12f4-484e-ae7f-dbbfe6a1a399' })
@@ -15,17 +19,17 @@ export class Sale implements Partial<PrismaSale> {
   @ApiProperty()
   rep: UserWithRole | null;
 
-  @ApiProperty({ example: '889ad0a9-86f1-4c3a-a75a-e4e1857e1093' })
+  @ApiProperty()
   customer: Customer;
 
-  @ApiProperty({ example: 'TODO' })
-  contract: string;
+  @ApiProperty()
+  contract: Contract;
 
-  @ApiProperty({ example: 'TODO' })
-  item: number;
+  @ApiProperty()
+  item: Item;
 
-  @ApiProperty({ example: 'TODO' })
-  status: string;
+  @ApiProperty()
+  status: Status;
 
   @ApiProperty({
     example: 'Klient chce aby prawnik był specjalistą w zakresie prawa karnego',
