@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ErrorDto {
-  @ApiProperty()
+  @ApiProperty({ example: ['email has to be unique'] })
   errors: string[];
 }

@@ -25,7 +25,7 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserByIdPipe } from 'src/user/pipes/user-by-id.pipe';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { ParseOptionalBoolPipe } from 'src/common/pipes/parse-optional-bool.pipe';
-import { UserWithRole } from '../docs/swaggerTypes/user-with-role';
+import { User as SwaggerUser } from '../docs/swaggerTypes/user';
 import { PromoteUserDto } from './dto/promote-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto copy';
 import { SelfGuard } from './guards/self.guard';
@@ -48,7 +48,7 @@ export class UsersController {
   })
   @ApiQuery({ name: 'isArchived', type: 'boolean', required: false })
   @ApiResponse({
-    type: [UserWithRole],
+    type: [SwaggerUser],
     status: 200,
     description: 'Success',
   })
@@ -75,7 +75,7 @@ export class UsersController {
     type: 'string',
   })
   @ApiResponse({
-    type: UserWithRole,
+    type: SwaggerUser,
     status: 200,
     description: 'Success',
   })
@@ -95,7 +95,7 @@ export class UsersController {
 
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({
-    type: [UserWithRole],
+    type: [SwaggerUser],
     status: 200,
     description: 'Success',
   })

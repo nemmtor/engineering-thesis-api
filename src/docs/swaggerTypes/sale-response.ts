@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Sale as PrismaSale } from '.prisma/client';
-import { UserWithRole } from './user-with-role';
+import { User } from './user';
 import { Customer } from './customer';
 import { Contract } from './contract';
 import { Item } from './items';
@@ -11,13 +11,13 @@ export class Sale implements Partial<PrismaSale> {
   id: string;
 
   @ApiProperty()
-  user: UserWithRole;
+  user: User;
 
   @ApiProperty()
-  qa: UserWithRole | null;
+  qa: User;
 
   @ApiProperty()
-  rep: UserWithRole | null;
+  rep: User;
 
   @ApiProperty()
   customer: Customer;

@@ -15,9 +15,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserLoginRequest } from 'src/docs/swaggerTypes/user-login-request';
+import { UserLoginRequestPayload } from 'src/docs/swaggerTypes/user-login-request-payload';
 import { UserLoginResponse } from 'src/docs/swaggerTypes/user-login-response';
-import { UserWithRole } from 'src/docs/swaggerTypes/user-with-role';
+import { User } from 'src/docs/swaggerTypes/user';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
@@ -44,7 +44,7 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
     description: 'Success',
-    type: UserWithRole,
+    type: User,
     status: 201,
   })
   @ApiResponse({
@@ -73,7 +73,7 @@ export class AuthController {
     type: ErrorDto,
     status: 401,
   })
-  @ApiBody({ type: UserLoginRequest })
+  @ApiBody({ type: UserLoginRequestPayload })
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Req() req: RequestWithUserId, @Res() response: Response) {
@@ -127,7 +127,7 @@ export class AuthController {
     type: ErrorDto,
     status: 403,
   })
-  @ApiBody({ type: UserLoginRequest })
+  @ApiBody({ type: UserLoginRequestPayload })
   @UseGuards(LocalAuthGuard, RolesGuard)
   @Roles(UserRole.SALES_REPRESENTATIVE)
   @Post('login-mobile')
@@ -140,7 +140,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current logged user' })
   @ApiResponse({
     description: 'Success',
-    type: UserWithRole,
+    type: User,
     status: 200,
   })
   @ApiResponse({
