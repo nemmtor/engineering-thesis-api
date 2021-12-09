@@ -8,6 +8,18 @@ import { UserWithRole } from 'src/user/user.types';
 import { Prisma, StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 
+const userSelect = {
+  avatarUrl: true,
+  createdAt: true,
+  archivedAt: true,
+  email: true,
+  id: true,
+  isActive: true,
+  name: true,
+  updatedAt: true,
+  roleId: true,
+};
+
 const isValidStatus = (status: any): status is StatusType => {
   if (Object.keys(StatusType).includes(status)) {
     return true;
@@ -59,7 +71,20 @@ export class SaleService {
     }
 
     try {
-      const sales = await this.prismaService.sale.findMany({ where });
+      const sales = await this.prismaService.sale.findMany({
+        select: {
+          id: true,
+          contract: true,
+          customer: true,
+          item: true,
+          qa: { select: userSelect },
+          user: { select: userSelect },
+          rep: { select: userSelect },
+          status: true,
+          others: true,
+        },
+        where,
+      });
 
       return sales;
     } catch (error) {
@@ -79,9 +104,9 @@ export class SaleService {
           contract: true,
           customer: true,
           item: true,
-          qa: true,
-          user: true,
-          rep: true,
+          qa: { select: userSelect },
+          user: { select: userSelect },
+          rep: { select: userSelect },
           status: true,
           others: true,
         },
