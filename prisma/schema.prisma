@@ -87,12 +87,12 @@ model Contract {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  plannedSignAt DateTime @updatedAt @map("planned_signed_at")
+  plannedSignAt DateTime @map("planned_signed_at")
   price         Int
   length        Int
   signAddress   String   @map("sign_address")
 
-  signedAt DateTime? @updatedAt @map("signed_at")
+  signedAt DateTime? @map("signed_at")
 
   sale Sale?
 

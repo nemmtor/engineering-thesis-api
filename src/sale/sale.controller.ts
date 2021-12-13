@@ -6,6 +6,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/auth/auth.types';
@@ -17,8 +18,10 @@ import { Roles } from 'src/common/guards/roles/roles.decorator';
 import { StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { SaleService } from './sale.service';
+import { FormatSaleResponseInterceptor } from './interceptors/format-sale-response.interceptor';
 
 @ApiTags('Sale')
+@UseInterceptors(FormatSaleResponseInterceptor)
 @Controller('sale')
 export class SaleController {
   constructor(private readonly saleService: SaleService) {}

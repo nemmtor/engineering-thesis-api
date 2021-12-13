@@ -36,6 +36,18 @@ const isArrayOfValidStatuses = (statuses: any): statuses is StatusType[] => {
   return true;
 };
 
+const saleSelect = {
+  id: true,
+  contract: true,
+  customer: true,
+  item: true,
+  qa: { select: userSelect },
+  user: { select: userSelect },
+  rep: { select: userSelect },
+  status: true,
+  others: true,
+};
+
 @Injectable()
 export class SaleService {
   constructor(private prismaService: PrismaService) {}
@@ -72,17 +84,7 @@ export class SaleService {
 
     try {
       const sales = await this.prismaService.sale.findMany({
-        select: {
-          id: true,
-          contract: true,
-          customer: true,
-          item: true,
-          qa: { select: userSelect },
-          user: { select: userSelect },
-          rep: { select: userSelect },
-          status: true,
-          others: true,
-        },
+        select: saleSelect,
         where,
       });
 
@@ -99,17 +101,7 @@ export class SaleService {
 
     try {
       const sales = await this.prismaService.sale.findMany({
-        select: {
-          id: true,
-          contract: true,
-          customer: true,
-          item: true,
-          qa: { select: userSelect },
-          user: { select: userSelect },
-          rep: { select: userSelect },
-          status: true,
-          others: true,
-        },
+        select: saleSelect,
         where: {
           OR: [{ userId }, { qaId: userId }, { repId: userId }],
           AND: { status: { is: { type: { in: statuses } } } },
@@ -135,10 +127,13 @@ export class SaleService {
                 create: createSaleDto.customer,
               },
             },
-            contract: { create: createSaleDto.contract },
+            contract: {
+              create: createSaleDto.contract,
+            },
             status: { create: { type: StatusType.BEFORE_QA } },
             others: createSaleDto.others,
           },
+          select: saleSelect,
         }),
       ];
 
