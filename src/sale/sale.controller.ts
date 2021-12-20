@@ -19,6 +19,7 @@ import { StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { SaleService } from './sale.service';
 import { FormatSaleResponseInterceptor } from './interceptors/format-sale-response.interceptor';
+import { AssignSaleDto } from './dto/assign-sale.dto';
 
 @ApiTags('Sale')
 @UseInterceptors(FormatSaleResponseInterceptor)
@@ -102,5 +103,35 @@ export class SaleController {
   @Get('/unassigned')
   async getUnassignedSales(@Req() req: RequestWithUser) {
     return this.saleService.getUnassignedSales(req.user);
+  }
+
+  @ApiOperation({ summary: 'Assign sale' })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: [Sale],
+  })
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(
+    UserRole.MANAGER,
+    UserRole.SALES_REPRESENTATIVE,
+    UserRole.QUALITY_CONTROLLER,
+  )
+  @Post('/assign')
+  async assignSale(
+    @Req() req: RequestWithUser,
+    @Body() assignSaleDto: AssignSaleDto,
+  ) {
+    return this.saleService.assignSale(assignSaleDto, req.user);
   }
 }

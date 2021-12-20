@@ -2,11 +2,13 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserWithRole } from 'src/user/user.types';
 import { Prisma, StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
+import { AssignSaleDto } from './dto/assign-sale.dto';
 
 const userSelect = {
   avatarUrl: true,
@@ -157,5 +159,32 @@ export class SaleService {
     } catch (error) {
       throw new ConflictException(error);
     }
+  }
+
+  async assignSale(assignSaleDto: AssignSaleDto, user: UserWithRole) {
+    const sale = await this.prismaService.sale.findUnique({
+      where: { id: assignSaleDto.saleId },
+      select: { status: true },
+    });
+
+    if (!sale) {
+      throw new NotFoundException('Sale not found');
+    }
+
+    if (
+      user.role.name === UserRole.SALES_REPRESENTATIVE &&
+      sale.status.type === StatusType.SALE_CONFIRMED
+    ) {
+      const updatedSale = await this.prismaService.sale.update({
+        where: { id: assignSaleDto.saleId },
+        data: {
+          repId: user.id,
+        },
+        select: saleSelect,
+      });
+
+      return updatedSale;
+    }
+    return new BadRequestException("Couldn't find proper sale");
   }
 }
