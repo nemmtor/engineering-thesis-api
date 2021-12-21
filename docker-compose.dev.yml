@@ -9,7 +9,7 @@ services:
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     depends_on:
-      - postgres
+      - postgres-dev
     env_file:
       - .env
     volumes:
