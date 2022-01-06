@@ -164,7 +164,7 @@ export class SaleService {
   async assignSale(assignSaleDto: AssignSaleDto, user: UserWithRole) {
     const sale = await this.prismaService.sale.findUnique({
       where: { id: assignSaleDto.saleId },
-      select: { status: true },
+      select: { status: true, repId: true, qaId: true },
     });
 
     if (!sale) {
@@ -173,7 +173,8 @@ export class SaleService {
 
     if (
       user.role.name === UserRole.SALES_REPRESENTATIVE &&
-      sale.status.type === StatusType.SALE_CONFIRMED
+      sale.status.type === StatusType.SALE_CONFIRMED &&
+      !sale.repId
     ) {
       const updatedSale = await this.prismaService.sale.update({
         where: { id: assignSaleDto.saleId },
@@ -185,6 +186,23 @@ export class SaleService {
 
       return updatedSale;
     }
+
+    if (
+      user.role.name === UserRole.QUALITY_CONTROLLER &&
+      sale.status.type === StatusType.BEFORE_QA &&
+      !sale.qaId
+    ) {
+      const updatedSale = await this.prismaService.sale.update({
+        where: { id: assignSaleDto.saleId },
+        data: {
+          qaId: user.id,
+        },
+        select: saleSelect,
+      });
+
+      return updatedSale;
+    }
+
     return new BadRequestException("Couldn't find proper sale");
   }
 }

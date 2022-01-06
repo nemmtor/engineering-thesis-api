@@ -8,41 +8,41 @@ services:
     command: sh scripts/start.dev.sh
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
-    depends_on:
-      - postgres-dev
+    # depends_on:
+    #   - postgres-dev
     env_file:
       - .env
     volumes:
       - ./:/api
       - exclude:/api/node_modules/
 
-  postgres:
-    image: postgres:13
-    container_name: postgres-dev
-    ports:
-      - 5433:5433
-    env_file:
-      - .env
-    volumes:
-      - postgres-dev:/var/lib/postgresql/data
-    command: -p 5433
+  # postgres:
+  #   image: postgres:13
+  #   container_name: postgres-dev
+  #   ports:
+  #     - 5433:5433
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - postgres-dev:/var/lib/postgresql/data
+  #   command: -p 5433
   
-  pgadmin:
-    container_name: pgadmin-dev
-    image: dpage/pgadmin4:4.23
-    env_file:
-      - .env
-    ports:
-        - ${PGADMIN_LISTEN_PORT}:${PGADMIN_LISTEN_PORT}
-    volumes:
-        - pgadmin-dev:/var/lib/pgadmin
-    depends_on:
-        - postgres
+  # pgadmin:
+  #   container_name: pgadmin-dev
+  #   image: dpage/pgadmin4:4.23
+  #   env_file:
+  #     - .env
+  #   ports:
+  #       - ${PGADMIN_LISTEN_PORT}:${PGADMIN_LISTEN_PORT}
+  #   volumes:
+  #       - pgadmin-dev:/var/lib/pgadmin
+  #   depends_on:
+  #       - postgres-dev
 
 volumes:
-  postgres-dev:
-    name: saleshelper-db-volume-dev
-  pgadmin-dev:
-    name: saleshelper-pgadmin-volume-dev
+#   postgres-dev:
+#     name: saleshelper-db-volume-dev
+#   pgadmin-dev:
+#     name: saleshelper-pgadmin-volume-dev
   exclude:
   
