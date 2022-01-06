@@ -203,6 +203,30 @@ export class SaleService {
       return updatedSale;
     }
 
+    // Admin or Manager change QA
+    if (
+      ['ADMIN', 'MANAGER'].includes(user.role.name) &&
+      assignSaleDto.userId
+      // assignSaleDto.userRole === 'qa'
+    ) {
+      if (!assignSaleDto.userRole) {
+        return new BadRequestException('User role is required');
+      }
+
+      const data =
+        assignSaleDto.userRole === 'qa'
+          ? { qaId: assignSaleDto.userId }
+          : { repId: assignSaleDto.userId };
+
+      const updatedSale = await this.prismaService.sale.update({
+        where: { id: assignSaleDto.saleId },
+        data,
+        select: saleSelect,
+      });
+
+      return updatedSale;
+    }
+
     return new BadRequestException("Couldn't find proper sale");
   }
 }

@@ -10,4 +10,9 @@ export class AssignSaleDto {
   @IsOptional()
   @IsString()
   userId?: string;
+
+  @ApiProperty({ example: 'qa' })
+  @IsOptional()
+  @IsString()
+  userRole?: 'qa' | 'rep';
 }
