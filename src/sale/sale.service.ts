@@ -9,6 +9,7 @@ import { UserWithRole } from 'src/user/user.types';
 import { Prisma, StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { AssignSaleDto } from './dto/assign-sale.dto';
+import { ChangeSaleStatusDto } from './dto/change-sale-status.dto';
 
 const userSelect = {
   avatarUrl: true,
@@ -225,6 +226,37 @@ export class SaleService {
       });
 
       return updatedSale;
+    }
+
+    return new BadRequestException("Couldn't find proper sale");
+  }
+  async changeSaleStatus(
+    changeSaleStatusDto: ChangeSaleStatusDto,
+    user: UserWithRole,
+  ) {
+    const sale = await this.prismaService.sale.findUnique({
+      where: { id: changeSaleStatusDto.saleId },
+      select: { status: true, repId: true },
+    });
+
+    if (!sale) {
+      throw new NotFoundException('Sale not found');
+    }
+
+    if (
+      user.role.name === UserRole.SALES_REPRESENTATIVE &&
+      sale.status.type === StatusType.SALE_CONFIRMED &&
+      sale.repId === user.id
+    ) {
+      await this.prismaService.saleStatus.update({
+        where: { id: sale.status.id },
+        data: {
+          type: changeSaleStatusDto.status,
+          message: changeSaleStatusDto.message,
+        },
+      });
+
+      return 'Ok';
     }
 
     return new BadRequestException("Couldn't find proper sale");

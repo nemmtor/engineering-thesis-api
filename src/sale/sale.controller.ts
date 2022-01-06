@@ -20,6 +20,7 @@ import { CreateSaleDto } from './dto/create-sale.dto';
 import { SaleService } from './sale.service';
 import { FormatSaleResponseInterceptor } from './interceptors/format-sale-response.interceptor';
 import { AssignSaleDto } from './dto/assign-sale.dto';
+import { ChangeSaleStatusDto } from './dto/change-sale-status.dto';
 
 @ApiTags('Sale')
 @UseInterceptors(FormatSaleResponseInterceptor)
@@ -131,6 +132,31 @@ export class SaleController {
   async assignSale(
     @Req() req: RequestWithUser,
     @Body() assignSaleDto: AssignSaleDto,
+  ) {
+    return this.saleService.assignSale(assignSaleDto, req.user);
+  }
+
+  @ApiOperation({ summary: 'Change status' })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: [Sale],
+  })
+  @UseGuards(JwtGuard)
+  @Post('/change-status')
+  async changeStatus(
+    @Req() req: RequestWithUser,
+    @Body() assignSaleDto: ChangeSaleStatusDto,
   ) {
     return this.saleService.assignSale(assignSaleDto, req.user);
   }
