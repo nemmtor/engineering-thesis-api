@@ -64,6 +64,7 @@ model Customer {
   companyAddress String @map("company_address")
 
   email String? @unique
+  phone String?
 
   lawyer   Lawyer? @relation(fields: [lawyerId], references: [id])
   lawyerId String? @map("lawyer_id")

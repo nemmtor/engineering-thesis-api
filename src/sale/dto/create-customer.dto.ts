@@ -11,6 +11,10 @@ export class CreateCustomerDto {
   @IsEmail()
   email?: string;
 
+  @ApiProperty({ example: '600100200' })
+  @IsString()
+  phone: string;
+
   @ApiProperty({ example: 'Adam Kowalski FHU' })
   @IsString()
   companyName: string;

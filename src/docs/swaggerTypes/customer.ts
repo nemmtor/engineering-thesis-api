@@ -20,6 +20,9 @@ export class Customer implements PrismaCustomer {
   @ApiProperty({ example: 'adam@kowalski.com' })
   email: string;
 
+  @ApiProperty({ example: '600100300' })
+  phone: string;
+
   @ApiProperty({ example: '113261b2-ccf4-192c-c123-rl02a4441' })
   id: string;
 
