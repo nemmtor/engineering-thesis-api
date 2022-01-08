@@ -117,6 +117,29 @@ export class SaleService {
     }
   }
 
+  async findById(saleId: string, user: UserWithRole) {
+    const where: Prisma.SaleWhereInput = { id: saleId };
+
+    if (user.role.name === 'QUALITY_CONTROLLER') {
+      where.AND = { qaId: user.id };
+    } else if (user.role.name === 'SALES_REPRESENTATIVE') {
+      where.AND = { repId: user.id };
+    } else if (user.role.name === 'USER') {
+      where.AND = { userId: user.id };
+    }
+
+    const sale = await this.prismaService.sale.findFirst({
+      select: saleSelect,
+      where,
+    });
+
+    if (!sale) {
+      throw new NotFoundException('Sale not found');
+    }
+
+    return sale;
+  }
+
   async createSale(createSaleDto: CreateSaleDto, userId: string) {
     try {
       const queries: any[] = [

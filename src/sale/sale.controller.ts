@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -77,6 +78,29 @@ export class SaleController {
     @Query() query: { statuses: StatusType[] },
   ) {
     return this.saleService.findSales(query.statuses, req.user.id);
+  }
+
+  @ApiOperation({ summary: 'Get sale by id' })
+  @ApiQuery({ name: 'statuses[]', required: false })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: Sale,
+  })
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  async getSale(@Param('id') saleId: string, @Req() req: RequestWithUser) {
+    return this.saleService.findById(saleId, req.user);
   }
 
   @ApiOperation({ summary: 'Get unassigned sales' })
