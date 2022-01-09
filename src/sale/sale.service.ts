@@ -253,13 +253,14 @@ export class SaleService {
 
     return new BadRequestException("Couldn't find proper sale");
   }
+
   async changeSaleStatus(
     changeSaleStatusDto: ChangeSaleStatusDto,
     user: UserWithRole,
   ) {
     const sale = await this.prismaService.sale.findUnique({
       where: { id: changeSaleStatusDto.saleId },
-      select: { status: true, repId: true },
+      select: { status: true, repId: true, qaId: true, userId: true },
     });
 
     if (!sale) {
@@ -271,6 +272,86 @@ export class SaleService {
       sale.status.type === StatusType.SALE_CONFIRMED &&
       sale.repId === user.id
     ) {
+      if (
+        !['SIGN_ACCEPTED', 'SIGN_REJECTED'].includes(changeSaleStatusDto.status)
+      ) {
+        return new BadRequestException('Wrong status');
+      }
+
+      await this.prismaService.saleStatus.update({
+        where: { id: sale.status.id },
+        data: {
+          type: changeSaleStatusDto.status,
+          message: changeSaleStatusDto.message,
+        },
+      });
+
+      return 'Ok';
+    }
+
+    if (
+      user.role.name === UserRole.QUALITY_CONTROLLER &&
+      sale.status.type === StatusType.BEFORE_QA &&
+      sale.qaId === user.id
+    ) {
+      if (
+        !['QA_REJECTED', 'QA_ACCEPTED'].includes(changeSaleStatusDto.status)
+      ) {
+        return new BadRequestException('Wrong status');
+      }
+
+      await this.prismaService.saleStatus.update({
+        where: { id: sale.status.id },
+        data: {
+          type: changeSaleStatusDto.status,
+          message: changeSaleStatusDto.message,
+        },
+      });
+
+      return 'Ok';
+    }
+
+    if (
+      user.role.name === UserRole.USER &&
+      ['QA_REJECTED'].includes(sale.status.type) &&
+      sale.userId === user.id
+    ) {
+      if (!['BEFORE_QA'].includes(changeSaleStatusDto.status)) {
+        return new BadRequestException('Wrong status');
+      }
+
+      await this.prismaService.saleStatus.update({
+        where: { id: sale.status.id },
+        data: {
+          type: changeSaleStatusDto.status,
+          message: changeSaleStatusDto.message,
+        },
+      });
+
+      return 'Ok';
+    }
+
+    if (
+      user.role.name === UserRole.USER &&
+      ['QA_ACCEPTED'].includes(sale.status.type) &&
+      sale.userId === user.id
+    ) {
+      if (!['SALE_CONFIRMED'].includes(changeSaleStatusDto.status)) {
+        return new BadRequestException('Wrong status');
+      }
+
+      await this.prismaService.saleStatus.update({
+        where: { id: sale.status.id },
+        data: {
+          type: changeSaleStatusDto.status,
+          message: changeSaleStatusDto.message,
+        },
+      });
+
+      return 'Ok';
+    }
+
+    if (['ADMIN', 'MANAGER'].includes(user.role.name)) {
       await this.prismaService.saleStatus.update({
         where: { id: sale.status.id },
         data: {

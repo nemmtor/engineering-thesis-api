@@ -180,8 +180,8 @@ export class SaleController {
   @Post('/change-status')
   async changeStatus(
     @Req() req: RequestWithUser,
-    @Body() assignSaleDto: ChangeSaleStatusDto,
+    @Body() changeSaleStatusDto: ChangeSaleStatusDto,
   ) {
-    return this.saleService.assignSale(assignSaleDto, req.user);
+    return this.saleService.changeSaleStatus(changeSaleStatusDto, req.user);
   }
 }
