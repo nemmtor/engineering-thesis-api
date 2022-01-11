@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -6,16 +7,19 @@ import {
   Post,
   Query,
   Req,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
 import { RequestWithUser } from 'src/auth/auth.types';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { Sale } from 'src/docs/swaggerTypes/sale-response';
 import { JwtGuard } from 'src/jwt/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/guards/roles/roles.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { SaleService } from './sale.service';
@@ -184,5 +188,49 @@ export class SaleController {
     @Body() changeSaleStatusDto: ChangeSaleStatusDto,
   ) {
     return this.saleService.changeSaleStatus(changeSaleStatusDto, req.user);
+  }
+
+  @ApiOperation({ summary: 'Upload contract image' })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: [Sale],
+  })
+  @UseGuards(JwtGuard)
+  @Post('/upload')
+  @UseInterceptors(
+    FilesInterceptor('files', 20, {
+      storage: diskStorage({
+        destination: './uploads/',
+        filename: (_req, file, cb) => {
+          const splittedFile = file.originalname.split('.');
+          const extension = splittedFile[splittedFile.length - 1];
+          cb(null, `${Date.now().toString()}.${extension}`);
+        },
+      }),
+    }),
+  )
+  uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
+    const response: string[] = [];
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No files');
+    }
+
+    files.forEach((file) => {
+      response.push(file.filename);
+    });
+
+    return response;
   }
 }

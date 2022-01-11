@@ -329,7 +329,7 @@ export class SaleService {
       ['QA_REJECTED'].includes(sale.status.type) &&
       sale.user.id === user.id
     ) {
-      if (!['BEFORE_QA'].includes(changeSaleStatusDto.status)) {
+      if (!['BEFORE_QA', 'RESIGNATION'].includes(changeSaleStatusDto.status)) {
         return new BadRequestException('Wrong status');
       }
 
@@ -356,7 +356,9 @@ export class SaleService {
       ['QA_ACCEPTED'].includes(sale.status.type) &&
       sale.user.id === user.id
     ) {
-      if (!['SALE_CONFIRMED'].includes(changeSaleStatusDto.status)) {
+      if (
+        !['SALE_CONFIRMED', 'RESIGNATION'].includes(changeSaleStatusDto.status)
+      ) {
         return new BadRequestException('Wrong status');
       }
 

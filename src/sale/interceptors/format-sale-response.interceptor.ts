@@ -9,6 +9,8 @@ import { map, Observable } from 'rxjs';
 import { Sale } from 'src/docs/swaggerTypes/sale-response';
 
 const getFormattedSale = (data: Sale) => {
+  if (!data?.contract?.plannedSignAt) return data;
+
   const [plannedSignedAtWithoutTime] = data.contract.plannedSignAt
     .toISOString()
     .split('T');
