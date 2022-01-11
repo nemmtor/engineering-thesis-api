@@ -45,7 +45,8 @@ export class SaleController {
     status: 201,
     type: Sale,
   })
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.USER)
   @Post()
   async create(
     @Req() req: RequestWithUser,
@@ -79,7 +80,6 @@ export class SaleController {
   ) {
     return this.saleService.findSales(query.statuses, req.user.id);
   }
-
 
   @ApiOperation({ summary: 'Get unassigned sales' })
   @ApiResponse({
@@ -130,7 +130,6 @@ export class SaleController {
   async getSale(@Param('id') saleId: string, @Req() req: RequestWithUser) {
     return this.saleService.findById(saleId, req.user);
   }
-
 
   @ApiOperation({ summary: 'Assign sale' })
   @ApiResponse({
