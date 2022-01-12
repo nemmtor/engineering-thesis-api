@@ -5,27 +5,28 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { RequestWithUser } from 'src/auth/auth.types';
+import { Roles } from 'src/common/guards/roles/roles.decorator';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { Sale } from 'src/docs/swaggerTypes/sale-response';
 import { JwtGuard } from 'src/jwt/guards/jwt.guard';
-import { RolesGuard } from 'src/common/guards/roles/roles.guard';
-import { Roles } from 'src/common/guards/roles/roles.decorator';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { StatusType, UserRole } from '.prisma/client';
-import { CreateSaleDto } from './dto/create-sale.dto';
-import { SaleService } from './sale.service';
-import { FormatSaleResponseInterceptor } from './interceptors/format-sale-response.interceptor';
 import { AssignSaleDto } from './dto/assign-sale.dto';
 import { ChangeSaleStatusDto } from './dto/change-sale-status.dto';
+import { CreateSaleDto } from './dto/create-sale.dto';
+import { FormatSaleResponseInterceptor } from './interceptors/format-sale-response.interceptor';
+import { SaleService } from './sale.service';
 
 @ApiTags('Sale')
 @UseInterceptors(FormatSaleResponseInterceptor)
@@ -59,6 +60,33 @@ export class SaleController {
     return this.saleService.createSale(createSaleDto, req.user.id);
   }
 
+  @ApiOperation({ summary: 'Update sale' })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Sale updated',
+    status: 201,
+    type: Sale,
+  })
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.USER)
+  @Put(':id')
+  async update(
+    @Req() req: RequestWithUser,
+    @Param('id') saleId: string,
+    @Body() createSaleDto: CreateSaleDto,
+  ) {
+    return this.saleService.updateSale(createSaleDto, saleId);
+  }
+
   @ApiOperation({ summary: 'Get sales' })
   @ApiQuery({ name: 'statuses[]', required: false })
   @ApiResponse({
@@ -82,7 +110,11 @@ export class SaleController {
     @Req() req: RequestWithUser,
     @Query() query: { statuses: StatusType[] },
   ) {
-    return this.saleService.findSales(query.statuses, req.user.id);
+    return this.saleService.findSales(
+      query.statuses,
+      req.user.id,
+      req.user.role.name,
+    );
   }
 
   @ApiOperation({ summary: 'Get unassigned sales' })

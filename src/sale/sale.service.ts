@@ -61,11 +61,20 @@ export class SaleService {
       user.role.name === UserRole.ADMIN ||
       user.role.name === UserRole.MANAGER
     ) {
-      where.AND = {
-        status: { is: { type: { in: ['BEFORE_QA', 'SALE_CONFIRMED'] } } },
-      };
-
-      where.OR = [{ qaId: { equals: null } }, { repId: { equals: null } }];
+      where.OR = [
+        {
+          AND: {
+            status: { is: { type: { equals: 'BEFORE_QA' } } },
+            qaId: { equals: null },
+          },
+        },
+        {
+          AND: {
+            status: { is: { type: { equals: 'SALE_CONFIRMED' } } },
+            repId: { equals: null },
+          },
+        },
+      ];
     }
 
     if (user.role.name === UserRole.SALES_REPRESENTATIVE) {
@@ -96,18 +105,31 @@ export class SaleService {
     }
   }
 
-  async findSales(statuses: StatusType[], userId: string) {
+  async findSales(statuses: StatusType[], userId: string, userRole: UserRole) {
     if (!!statuses && !isArrayOfValidStatuses(statuses)) {
       throw new BadRequestException();
+    }
+
+    const where: Prisma.SaleWhereInput = {
+      AND: { status: { is: { type: { in: statuses } } } },
+    };
+
+    if (userRole === UserRole.USER) {
+      where.AND = { ...where.AND, userId };
+    }
+
+    if (userRole === UserRole.SALES_REPRESENTATIVE) {
+      where.AND = { ...where.AND, repId: userId };
+    }
+
+    if (userRole === UserRole.QUALITY_CONTROLLER) {
+      where.AND = { ...where.AND, qaId: userId };
     }
 
     try {
       const sales = await this.prismaService.sale.findMany({
         select: saleSelect,
-        where: {
-          OR: [{ userId }, { qaId: userId }, { repId: userId }],
-          AND: { status: { is: { type: { in: statuses } } } },
-        },
+        where,
       });
 
       return sales;
@@ -179,6 +201,46 @@ export class SaleService {
       const sale = results[results.length - 1];
 
       return sale;
+    } catch (error) {
+      throw new ConflictException(error);
+    }
+  }
+
+  async updateSale(createSaleDto: CreateSaleDto, saleId: string) {
+    const foundSale = await this.prismaService.sale.findUnique({
+      where: { id: saleId },
+      select: saleSelect,
+    });
+
+    if (!foundSale) {
+      throw new NotFoundException('Sale not found');
+    }
+
+    try {
+      const queries: any[] = [
+        this.prismaService.sale.update({
+          where: {
+            id: saleId,
+          },
+          data: {
+            item: { connect: { id: createSaleDto.itemId } },
+            others: createSaleDto.others,
+          },
+          select: saleSelect,
+        }),
+        this.prismaService.customer.update({
+          where: { id: foundSale.customer.id },
+          data: createSaleDto.customer,
+        }),
+        this.prismaService.contract.update({
+          where: { id: foundSale.contract.id },
+          data: createSaleDto.contract,
+        }),
+      ];
+
+      await this.prismaService.$transaction(queries);
+
+      return null;
     } catch (error) {
       throw new ConflictException(error);
     }

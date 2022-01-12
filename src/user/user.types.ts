@@ -9,6 +9,7 @@ export type UserWithRole = UserWithoutPassword & { role: { name: UserRole } };
 export type UsersQueryParams = {
   email?: string;
   name?: string;
+  role?: UserRole;
   isActive?: boolean;
   isArchived?: boolean;
 };

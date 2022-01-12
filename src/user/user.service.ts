@@ -71,6 +71,12 @@ export class UserService {
       where.name = query.name;
     }
 
+    if (query.role) {
+      where.role = {
+        name: query.role,
+      };
+    }
+
     if (typeof query.isActive === 'boolean') {
       where.isActive = query.isActive;
     }
