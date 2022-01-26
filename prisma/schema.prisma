@@ -125,7 +125,6 @@ enum StatusType {
   RESIGNATION
   SIGN_REJECTED
   SIGN_ACCEPTED
-  ASSIGNED
 }
 
 model SaleStatus {
