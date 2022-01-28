@@ -57,7 +57,7 @@ export class SaleController {
     @Req() req: RequestWithUser,
     @Body() createSaleDto: CreateSaleDto,
   ) {
-    return this.saleService.createSale(createSaleDto, req.user.id);
+    return this.saleService.createSale(createSaleDto, req.user);
   }
 
   @ApiOperation({ summary: 'Update sale' })

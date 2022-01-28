@@ -35,8 +35,8 @@ model User {
   role   Role @relation(fields: [roleId], references: [id])
   roleId Int  @default(1) @map("role_id")
 
-  sale     Sale[]
-  saleToQa Sale[] @relation("saleToQa")
+  sale      Sale[]
+  saleToQa  Sale[] @relation("saleToQa")
   saleToRep Sale[] @relation("saleToRep")
 
   @@map("user")

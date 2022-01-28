@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserWithRole } from 'src/user/user.types';
-import { Prisma, StatusType, UserRole } from '.prisma/client';
+import { NotificationService } from 'src/notification/notification.service';
+import { Prisma, Sale, StatusType, UserRole } from '.prisma/client';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { AssignSaleDto } from './dto/assign-sale.dto';
 import { ChangeSaleStatusDto } from './dto/change-sale-status.dto';
@@ -52,7 +53,10 @@ const saleSelect = {
 };
 @Injectable()
 export class SaleService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
 
   async getUnassignedSales(user: UserWithRole) {
     const where: Prisma.SaleWhereInput = {};
@@ -161,7 +165,9 @@ export class SaleService {
     return sale;
   }
 
-  async createSale(createSaleDto: CreateSaleDto, userId: string) {
+  async createSale(createSaleDto: CreateSaleDto, user: UserWithRole) {
+    const userId = user.id;
+
     try {
       const queries: any[] = [
         this.prismaService.sale.create({
@@ -198,7 +204,17 @@ export class SaleService {
       }
       const results = await this.prismaService.$transaction(queries);
 
-      const sale = results[results.length - 1];
+      const sale = results[results.length - 1] as Sale;
+
+      await this.notificationService.addNotification({
+        message: `Sprzedawca ${user.name} dodał nową sprzedaż.`,
+        channel: 'manager',
+      });
+
+      await this.notificationService.addNotification({
+        message: `Sprzedaż dla klienta: ${createSaleDto.customer.name}(nip: ${createSaleDto.customer.taxNumber}) oczekuje na weryfikację.`,
+        channel: 'qa',
+      });
 
       return sale;
     } catch (error) {
@@ -249,7 +265,13 @@ export class SaleService {
   async assignSale(assignSaleDto: AssignSaleDto, user: UserWithRole) {
     const sale = await this.prismaService.sale.findUnique({
       where: { id: assignSaleDto.saleId },
-      select: { status: true, repId: true, qaId: true },
+      select: {
+        status: true,
+        userId: true,
+        repId: true,
+        qaId: true,
+        customer: { select: { name: true } },
+      },
     });
 
     if (!sale) {
@@ -269,6 +291,17 @@ export class SaleService {
         select: saleSelect,
       });
 
+      this.notificationService.addNotification({
+        channel: 'manager',
+        message: `Sprzedaż dla klienta ${sale.customer.name} została przypisana do przedstawiciela: ${user.name}`,
+      });
+
+      this.notificationService.addNotification({
+        channel: `${sale.userId}`,
+        message:
+          'Twoja sprzedaż została przypisana do przedstawiciela handlowego',
+      });
+
       return updatedSale;
     }
 
@@ -285,10 +318,20 @@ export class SaleService {
         select: saleSelect,
       });
 
+      this.notificationService.addNotification({
+        channel: 'manager',
+        message: `Sprzedaż dla klienta ${sale.customer.name} została przypisana do kontrolera: ${user.name}`,
+      });
+
+      this.notificationService.addNotification({
+        channel: `${sale.userId}`,
+        message: 'Twoja sprzedaż została przypisana do kontrolera jakości',
+      });
+
       return updatedSale;
     }
 
-    // Admin or Manager change QA
+    // Admin or Manager change QA or sales rep
     if (
       ['ADMIN', 'MANAGER'].includes(user.role.name) &&
       assignSaleDto.userId
@@ -307,6 +350,20 @@ export class SaleService {
         where: { id: assignSaleDto.saleId },
         data,
         select: saleSelect,
+      });
+
+      this.notificationService.addNotification({
+        channel: assignSaleDto.userRole === 'qa' ? 'qa' : 'rep',
+        message: `Manager przypisał Ci sprzedaż dla ${sale.customer.name}`,
+      });
+
+      this.notificationService.addNotification({
+        channel: `${sale.userId}`,
+        message: `Twoja sprzedaż została przypisana do ${
+          assignSaleDto.userRole === 'qa'
+            ? 'kontrolera jakości'
+            : 'przedstawiciela handlowego'
+        }.`,
       });
 
       return updatedSale;

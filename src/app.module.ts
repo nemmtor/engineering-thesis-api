@@ -8,6 +8,8 @@ import { JwtModule } from './jwt/jwt.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { SaleModule } from './sale/sale.module';
+import { SocketsModule } from './sockets/sockets.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { SaleModule } from './sale/sale.module';
     AuthModule,
     JwtModule,
     SaleModule,
+    SocketsModule,
+    NotificationModule,
   ],
   providers: [
     {
