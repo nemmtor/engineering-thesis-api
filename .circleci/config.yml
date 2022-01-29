@@ -113,6 +113,7 @@ jobs:
       - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'PGADMIN_LISTEN_PORT=$PGADMIN_LISTEN_PORT' >> .env"
       - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'APP_DOMAIN=$APP_DOMAIN' >> .env"
       - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'ENV=$ENV' >> .env"
+      - run: ssh -oStrictHostKeyChecking=no -v $SSH_USER@$SSH_HOST "echo 'CEIDG_AUTH_TOKEN=$CEIDG_AUTH_TOKEN' >> .env"
       - run:
           name: Update docker-compose file
           command: scp docker-compose.yml $SSH_USER@$SSH_HOST:/root

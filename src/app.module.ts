@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { SaleModule } from './sale/sale.module';
 import { SocketsModule } from './sockets/sockets.module';
 import { NotificationModule } from './notification/notification.module';
+import { CeidgModule } from './ceidg/ceidg.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { NotificationModule } from './notification/notification.module';
     SaleModule,
     SocketsModule,
     NotificationModule,
+    CeidgModule,
   ],
   providers: [
     {

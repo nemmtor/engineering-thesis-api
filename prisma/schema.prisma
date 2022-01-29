@@ -27,7 +27,7 @@ model User {
   archivedAt DateTime? @map("archived_at")
 
   name      String
-  email     String  @unique
+  email     String?
   password  String
   avatarUrl String? @map("avatar_url")
   isActive  Boolean @default(false) @map("is_active")
