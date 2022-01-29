@@ -106,7 +106,7 @@ export class UserService {
 
   // Only for login purposes
   async findOneByEmailWithPassword(email: string): Promise<User> {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findFirst({
       where: { email },
       select: { ...userSelectWithRole, password: true },
     });
