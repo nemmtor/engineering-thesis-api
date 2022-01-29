@@ -4,13 +4,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as PDFDocument from 'pdfkit';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserWithRole } from 'src/user/user.types';
-import { NotificationService } from 'src/notification/notification.service';
-import { Prisma, Sale, StatusType, UserRole } from '.prisma/client';
-import { CreateSaleDto } from './dto/create-sale.dto';
+import { ItemType, Prisma, Sale, StatusType, UserRole } from '.prisma/client';
 import { AssignSaleDto } from './dto/assign-sale.dto';
 import { ChangeSaleStatusDto } from './dto/change-sale-status.dto';
+import { CreateSaleDto } from './dto/create-sale.dto';
 
 const userSelect = {
   avatarUrl: true,
@@ -22,6 +23,12 @@ const userSelect = {
   name: true,
   updatedAt: true,
   roleId: true,
+};
+
+const toItemTypeReadable: Record<ItemType, string> = {
+  CERTIFICATE: 'certyfikat',
+  GREEN_STAMP: 'zieloną pieczęć',
+  RED_STAMP: 'czerwoną pieczęć',
 };
 
 const isValidStatus = (status: any): status is StatusType => {
@@ -519,5 +526,108 @@ export class SaleService {
     }
 
     return new BadRequestException("Couldn't find proper sale");
+  }
+
+  async getContractPdf(id: string, user: UserWithRole) {
+    const sale = await this.findById(id, user);
+
+    const pdfBuffer: Buffer = await new Promise((resolve) => {
+      const doc = new PDFDocument({
+        size: 'A4',
+        bufferPages: true,
+        // @ts-ignore
+        font: 'fonts/font.ttf',
+      });
+
+      doc
+        .text('Umowa o świadczenie usług usług prawnych', { align: 'center' })
+        .moveDown(2);
+
+      doc.text(
+        `zawarta dnia ${sale.contract.plannedSignAt.toLocaleDateString(
+          'pl',
+        )} pod adresem ${sale.contract.signAddress}`,
+      );
+
+      doc.text(
+        `pomiędzy ${sale.customer.name} zwaną/ym dalej Zleceniodawcą, a`,
+      );
+
+      doc
+        .text(
+          'kancelarią prawną Przykładowa Kancelaria Prawna, zwaną dalej Zleceniobiorcą.',
+        )
+        .moveDown(3);
+
+      doc.text('§1.', { align: 'center' });
+
+      doc
+        .text(
+          '1. Przedmiotem umowy jest świadczenie usług ochrony prawnej oraz windykacyjnej przez Zleceniobiorcę na rzecz Zleceniodawcy.',
+        )
+        .moveDown(0.5);
+
+      doc
+        .text(
+          `2. Umowa zostaje zawarta na ${sale.contract.length} ${
+            sale.contract.length === 24 ? 'miesiące' : 'miesięcy'
+          }`,
+        )
+        .moveDown(0.5);
+
+      doc
+        .text(
+          `3. Zleceniodawca zobowiązuje się uiszczać miesięczny abonament w wysokości ${sale.contract.price}zł brutto na wskazany numer rachunku: 92101101712222936230591007`,
+        )
+        .moveDown(0.5);
+
+      doc
+        .text(
+          '4. Zleceniodawcy przysługuje odstąpienie od umowy świadczenia usług w terminie 30 dni od jej podpisania. Warunkiem skutecznego odstąpienia od umowy jest poinformowanie Zleceniobiorcy telefonicznie pod numerem 601202333 lub mailowo na adres biuro@przykladowa-kancelaria.pl',
+        )
+        .moveDown(0.5);
+
+      doc
+        .text(
+          `5. Zleceniodawca otrzymał wraz z umową ${
+            toItemTypeReadable[sale.item!.type]
+          } którą jest zobowiązany oddać w terminie 7 dni od odstąpienia od umowy pod rygorem naliczenia opłaty 99zł brutto.`,
+        )
+        .moveDown(0.5);
+
+      doc.text('6. Zleceniodawcy przysługujują w ramach umowy:');
+      doc.text('- trzy godziny miesięcznie na obsługę prawną');
+      doc.text('- dwa raporty BIK miesięcznie');
+      doc.text('- jedna reprezentacja w sądzie w ciągu roku');
+      doc.text('- nielimitowane konsultacje telefoniczne').moveDown(0.5);
+      doc
+        .text(
+          'Każde przekroczenie wyżej wymienionych usług będzie wiązało się z naliczeniem dodatkowych opłat opisanych w cenniku dołączonym do umowy',
+        )
+        .moveDown(0.5);
+
+      doc
+        .text(
+          'Zleceniodawca otrzyma od Zleceniobiorcy fakturę VAT nie później niż do 10 dnia każdego miesiąca.',
+        )
+        .moveDown(4);
+
+      doc.text('......................');
+      doc.text('Podpis Zleceniobiorcy').moveUp(2);
+
+      doc.text('......................', { align: 'right' });
+      doc.text('Podpis Zleceniodawcy', { align: 'right' });
+
+      doc.end();
+
+      const buffer = [];
+      doc.on('data', buffer.push.bind(buffer));
+      doc.on('end', () => {
+        const data = Buffer.concat(buffer);
+        resolve(data);
+      });
+    });
+
+    return pdfBuffer;
   }
 }

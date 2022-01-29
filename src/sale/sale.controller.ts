@@ -8,6 +8,7 @@ import {
   Put,
   Query,
   Req,
+  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -21,6 +22,7 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ErrorDto } from 'src/docs/swaggerTypes/error';
 import { Sale } from 'src/docs/swaggerTypes/sale-response';
 import { JwtGuard } from 'src/jwt/guards/jwt.guard';
+import { Response } from 'express';
 import { StatusType, UserRole } from '.prisma/client';
 import { AssignSaleDto } from './dto/assign-sale.dto';
 import { ChangeSaleStatusDto } from './dto/change-sale-status.dto';
@@ -115,6 +117,39 @@ export class SaleController {
       req.user.id,
       req.user.role.name,
     );
+  }
+  @ApiOperation({ summary: 'Get generated PDF contract' })
+  @ApiResponse({
+    description: 'Error in database layer',
+    status: 409,
+    type: ErrorDto,
+  })
+  @ApiResponse({
+    description: 'Unauthorized',
+    type: ErrorDto,
+    status: 401,
+  })
+  @ApiResponse({
+    description: 'Success',
+    status: 200,
+    type: 'blob',
+  })
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.SALES_REPRESENTATIVE)
+  @Get('contract-pdf/:id')
+  async getContractPdf(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+    @Param('id') id: string,
+  ) {
+    const buffer = await this.saleService.getContractPdf(id, req.user);
+
+    res.set({
+      'Content-Type': 'application/pdf; charset=utf-8',
+      'Content-Length': buffer.length,
+    });
+
+    res.end(buffer);
   }
 
   @ApiOperation({ summary: 'Get unassigned sales' })
