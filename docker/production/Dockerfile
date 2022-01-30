@@ -28,6 +28,7 @@ COPY --from=builder /api/package*.json ./
 COPY --from=builder /api/scripts/start.prod.sh ./
 COPY --from=builder /api/dist ./dist
 COPY --from=builder /api/prisma ./prisma
+COPY --from=builder /api/fonts ./fonts
 
 
 EXPOSE 3000
