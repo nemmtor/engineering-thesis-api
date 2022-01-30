@@ -39,7 +39,22 @@ model User {
   saleToQa  Sale[] @relation("saleToQa")
   saleToRep Sale[] @relation("saleToRep")
 
+  Notification Notification[]
+
   @@map("user")
+}
+
+model Notification {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now()) @map("created_at")
+  notificationTime DateTime @map("notification_time")
+  message          String
+  read             Boolean  @default(false)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  @@map("notification")
 }
 
 model Role {
