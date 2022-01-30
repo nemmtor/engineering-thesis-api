@@ -47,16 +47,6 @@ export class AuthController {
     type: User,
     status: 201,
   })
-  @ApiResponse({
-    description: 'Bad request',
-    status: 400,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     return this.authService.register(createUserDto);
@@ -67,11 +57,6 @@ export class AuthController {
     description: 'Success',
     type: UserLoginResponse,
     status: 201,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
   })
   @ApiBody({ type: UserLoginRequestPayload })
   @UseGuards(LocalAuthGuard)
@@ -117,16 +102,6 @@ export class AuthController {
     type: UserLoginResponse,
     status: 201,
   })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
-    description: 'Forbidden resource',
-    type: ErrorDto,
-    status: 403,
-  })
   @ApiBody({ type: UserLoginRequestPayload })
   @UseGuards(LocalAuthGuard, RolesGuard)
   @Roles(UserRole.SALES_REPRESENTATIVE)
@@ -143,11 +118,6 @@ export class AuthController {
     type: User,
     status: 200,
   })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard)
   @Get('me')
@@ -161,16 +131,6 @@ export class AuthController {
     status: 201,
   })
   @ApiBody({ type: ChangePasswordDto })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
-    description: 'Bad request',
-    type: ErrorDto,
-    status: 400,
-  })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, SelfGuard)
   @Post('change-password/:id')

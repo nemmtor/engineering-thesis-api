@@ -52,11 +52,6 @@ export class UsersController {
     status: 200,
     description: 'Success',
   })
-  @ApiResponse({
-    type: ErrorDto,
-    status: 401,
-    description: 'Unuathorized',
-  })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
@@ -79,12 +74,6 @@ export class UsersController {
     status: 200,
     description: 'Success',
   })
-  @ApiResponse({ type: ErrorDto, status: 404, description: 'User not found' })
-  @ApiResponse({
-    type: ErrorDto,
-    status: 401,
-    description: 'Unuathorized',
-  })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
@@ -98,21 +87,6 @@ export class UsersController {
     type: [SwaggerUser],
     status: 200,
     description: 'Success',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden resource',
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
-    type: ErrorDto,
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, SelfGuard)
@@ -129,16 +103,6 @@ export class UsersController {
     status: 200,
     description: 'Success',
   })
-  @ApiResponse({
-    type: ErrorDto,
-    status: 401,
-    description: 'Unuathorized',
-  })
-  @ApiResponse({
-    type: ErrorDto,
-    status: 404,
-    description: 'User not found',
-  })
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
   @Delete(':id')
@@ -152,16 +116,6 @@ export class UsersController {
     status: 200,
     description: 'Success',
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
-    type: ErrorDto,
-  })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.MANAGER)
@@ -174,16 +128,6 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Success',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
-    type: ErrorDto,
   })
   @ApiBearerAuth('Authorization')
   @UseGuards(JwtGuard, RolesGuard)

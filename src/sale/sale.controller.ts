@@ -38,16 +38,6 @@ export class SaleController {
 
   @ApiOperation({ summary: 'Create sale' })
   @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
     description: 'Sale created',
     status: 201,
     type: Sale,
@@ -63,16 +53,6 @@ export class SaleController {
   }
 
   @ApiOperation({ summary: 'Update sale' })
-  @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
   @ApiResponse({
     description: 'Sale updated',
     status: 201,
@@ -92,16 +72,6 @@ export class SaleController {
   @ApiOperation({ summary: 'Get sales' })
   @ApiQuery({ name: 'statuses[]', required: false })
   @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
     description: 'Success',
     status: 200,
     type: [Sale],
@@ -119,16 +89,6 @@ export class SaleController {
     );
   }
   @ApiOperation({ summary: 'Get generated PDF contract' })
-  @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
   @ApiResponse({
     description: 'Success',
     status: 200,
@@ -154,16 +114,6 @@ export class SaleController {
 
   @ApiOperation({ summary: 'Get unassigned sales' })
   @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
     description: 'Success',
     status: 200,
     type: [Sale],
@@ -182,16 +132,6 @@ export class SaleController {
   @ApiOperation({ summary: 'Get sale by id' })
   @ApiQuery({ name: 'statuses[]', required: false })
   @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
     description: 'Success',
     status: 200,
     type: Sale,
@@ -203,16 +143,6 @@ export class SaleController {
   }
 
   @ApiOperation({ summary: 'Assign sale' })
-  @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
   @ApiResponse({
     description: 'Success',
     status: 200,
@@ -234,16 +164,6 @@ export class SaleController {
 
   @ApiOperation({ summary: 'Change status' })
   @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
-  @ApiResponse({
     description: 'Success',
     status: 200,
     type: [Sale],
@@ -258,16 +178,6 @@ export class SaleController {
   }
 
   @ApiOperation({ summary: 'Upload contract image' })
-  @ApiResponse({
-    description: 'Error in database layer',
-    status: 409,
-    type: ErrorDto,
-  })
-  @ApiResponse({
-    description: 'Unauthorized',
-    type: ErrorDto,
-    status: 401,
-  })
   @ApiResponse({
     description: 'Success',
     status: 200,

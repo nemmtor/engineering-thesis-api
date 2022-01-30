@@ -211,17 +211,31 @@ export class SaleService {
       }
       const results = await this.prismaService.$transaction(queries);
 
-      const sale = results[results.length - 1] as Sale;
+      const sale = results[results.length - 1] as Sale & {
+        contract: { plannedSignAt: Date };
+      };
 
-      await this.notificationService.addNotification({
+      await this.notificationService.addSocketNotification({
         message: `Sprzedawca ${user.name} dodał nową sprzedaż.`,
         channel: 'manager',
       });
 
-      await this.notificationService.addNotification({
+      await this.notificationService.addSocketNotification({
         message: `Sprzedaż dla klienta: ${createSaleDto.customer.name}(nip: ${createSaleDto.customer.taxNumber}) oczekuje na weryfikację.`,
         channel: 'qa',
       });
+
+      const userNotificationDate = new Date(
+        new Date().setDate(
+          new Date(createSaleDto.contract.plannedSignAt).getDate() - 1,
+        ),
+      );
+
+      await this.notificationService.addDbNotification(
+        user.id,
+        userNotificationDate,
+        `Potwierdź sprzedaż dla klienta ${createSaleDto.customer.name}`,
+      );
 
       return sale;
     } catch (error) {
@@ -298,12 +312,12 @@ export class SaleService {
         select: saleSelect,
       });
 
-      this.notificationService.addNotification({
+      this.notificationService.addSocketNotification({
         channel: 'manager',
         message: `Sprzedaż dla klienta ${sale.customer.name} została przypisana do przedstawiciela: ${user.name}`,
       });
 
-      this.notificationService.addNotification({
+      this.notificationService.addSocketNotification({
         channel: `${sale.userId}`,
         message:
           'Twoja sprzedaż została przypisana do przedstawiciela handlowego',
@@ -325,12 +339,12 @@ export class SaleService {
         select: saleSelect,
       });
 
-      this.notificationService.addNotification({
+      this.notificationService.addSocketNotification({
         channel: 'manager',
         message: `Sprzedaż dla klienta ${sale.customer.name} została przypisana do kontrolera: ${user.name}`,
       });
 
-      this.notificationService.addNotification({
+      this.notificationService.addSocketNotification({
         channel: `${sale.userId}`,
         message: 'Twoja sprzedaż została przypisana do kontrolera jakości',
       });
@@ -359,12 +373,12 @@ export class SaleService {
         select: saleSelect,
       });
 
-      this.notificationService.addNotification({
+      this.notificationService.addSocketNotification({
         channel: assignSaleDto.userRole === 'qa' ? 'qa' : 'rep',
         message: `Manager przypisał Ci sprzedaż dla ${sale.customer.name}`,
       });
 
-      this.notificationService.addNotification({
+      this.notificationService.addSocketNotification({
         channel: `${sale.userId}`,
         message: `Twoja sprzedaż została przypisana do ${
           assignSaleDto.userRole === 'qa'
