@@ -291,6 +291,7 @@ export class SaleService {
         userId: true,
         repId: true,
         qaId: true,
+        contract: {select: {plannedSignAt: true}},
         customer: { select: { name: true } },
       },
     });
@@ -322,6 +323,12 @@ export class SaleService {
         message:
           'Twoja sprzedaż została przypisana do przedstawiciela handlowego',
       });
+
+      await this.notificationService.addDbNotification(
+        user.id,
+        sale.contract.plannedSignAt,
+        `Udaj się dziś do klienta ${sale.customer.name} w celu podpisania umowy`,
+      );
 
       return updatedSale;
     }
