@@ -291,7 +291,7 @@ export class SaleService {
         userId: true,
         repId: true,
         qaId: true,
-        contract: {select: {plannedSignAt: true}},
+        contract: { select: { plannedSignAt: true } },
         customer: { select: { name: true } },
       },
     });
@@ -381,7 +381,7 @@ export class SaleService {
       });
 
       this.notificationService.addSocketNotification({
-        channel: assignSaleDto.userRole === 'qa' ? 'qa' : 'rep',
+        channel: assignSaleDto.userId,
         message: `Manager przypisał Ci sprzedaż dla ${sale.customer.name}`,
       });
 
@@ -517,6 +517,14 @@ export class SaleService {
         },
       });
 
+      if (changeSaleStatusDto.status === 'SALE_CONFIRMED') {
+        this.notificationService.addSocketNotification({
+          channel: 'rep',
+          message:
+            'Nowa sprzedaż oczekuje na przypisanie przez przedstawiciela handlowego',
+        });
+      }
+
       return {
         ...sale,
         status: {
@@ -535,6 +543,14 @@ export class SaleService {
           message: changeSaleStatusDto.message,
         },
       });
+
+      if (changeSaleStatusDto.status === 'SALE_CONFIRMED' && !sale.rep) {
+        this.notificationService.addSocketNotification({
+          channel: 'rep',
+          message:
+            'Nowa sprzedaż oczekuje na przypisanie przez przedstawiciela handlowego',
+        });
+      }
 
       return {
         ...sale,
