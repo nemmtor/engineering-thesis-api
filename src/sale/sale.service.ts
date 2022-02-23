@@ -577,7 +577,7 @@ export class SaleService {
       });
 
       doc
-        .text('Umowa o świadczenie usług usług prawnych', { align: 'center' })
+        .text('Umowa o świadczenie usług prawnych', { align: 'center' })
         .moveDown(2);
 
       doc.text(
